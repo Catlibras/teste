@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Teste de Tradução em Libras</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Familjen+Grotesk:wght@600;700&display=swap">
+<style>
+/* Layout: coluna única. Vídeo no topo, etapas em fichas, painel de resposta embaixo com 6 cartões grandes (2x3 no celular, 3x2 no desktop). */
+:root {
+  --bg: #EDF1F4;
+  --surface: #FFFFFF;
+  --fg: #0F1B25;
+  --muted: #475A69;
+  --line: #C6D1D9;
+  --ink: #0F1B25;
+  --on-ink: #FFFFFF;
+  --focus: #0B5FD6;
+  --danger: #B42318;
+  --ok: #1B7A3E;
+  --i1: #C2410C; --i2: #1D4ED8; --i3: #15803D; --i4: #9333EA; --i5: #BE185D; --i6: #0E7490;
+  --font-display: "Familjen Grotesk", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0C141B; --surface: #16212B; --fg: #EAF0F4; --muted: #A3B4C0; --line: #2D3C48;
+    --ink: #EAF0F4; --on-ink: #0C141B; --focus: #6AA8FF; --danger: #FF8A80; --ok: #6DD58C;
+    --i1: #FB923C; --i2: #6EA2FF; --i3: #4ADE80; --i4: #C08BFF; --i5: #F472B6; --i6: #22D3EE;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0C141B; --surface: #16212B; --fg: #EAF0F4; --muted: #A3B4C0; --line: #2D3C48;
+  --ink: #EAF0F4; --on-ink: #0C141B; --focus: #6AA8FF; --danger: #FF8A80; --ok: #6DD58C;
+  --i1: #FB923C; --i2: #6EA2FF; --i3: #4ADE80; --i4: #C08BFF; --i5: #F472B6; --i6: #22D3EE;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 18px; line-height: 1.5;
+  padding-block: 24px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 960px; margin: 0 auto; display: grid; gap: 20px; }
+h1, h2 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+h2 { font-size: 1.4rem; }
+p { margin: 0; }
+.lead { color: var(--muted); max-width: 62ch; margin-top: 8px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
+
+.frame { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; max-width: 100%; }
+.frame iframe, .frame #yt { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.demo { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 12px; padding: 16px; text-align: center; color: #EAF0F4; background: linear-gradient(135deg, #1B2A37, #0C141B); }
+.demo[hidden] { display: none; }
+.demo strong { font-family: var(--font-display); font-size: 1.2rem; }
+.demo small { max-width: 44ch; color: #A3B4C0; font-size: .9rem; }
+.clock { font-variant-numeric: tabular-nums; font-size: 2rem; font-family: var(--font-display); }
+.bar { position: relative; width: min(420px, 80vw); height: 8px; border-radius: 4px; background: #2D3C48; }
+.bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #EAF0F4; border-radius: 4px; width: 0; }
+.bar b { position: absolute; top: -4px; width: 3px; height: 16px; background: #FB923C; }
+
+.steps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
+.steps li { padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; font-size: .95rem; color: var(--muted); background: var(--surface); }
+.steps li[aria-current="step"] { border-color: var(--ink); color: var(--fg); }
+.steps li.done { border-color: var(--ok); color: var(--ok); }
+.steps li.done::before { content: "✓ "; }
+
+.box { background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 16px; }
+.box[hidden] { display: none; }
+.how { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
+label.field { display: grid; gap: 6px; font-weight: 700; }
+input[type="text"] { font: inherit; padding: 12px 14px; border-radius: 8px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); max-width: 420px; }
+input[type="text"]:focus-visible { outline: 3px solid var(--focus); }
+.hint { color: var(--muted); font-weight: 400; font-size: .9rem; }
+
+.btn { font: inherit; font-weight: 700; padding: 14px 22px; border-radius: 8px; border: 2px solid var(--ink); background: var(--ink); color: var(--on-ink); cursor: pointer; min-height: 52px; }
+.btn.ghost { background: transparent; color: var(--fg); }
+.btn:hover { filter: brightness(1.12); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 14px; }
+legend { padding: 0; margin-bottom: 4px; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; text-wrap: balance; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; }
+.opt { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px; border: 3px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); min-height: 72px; }
+.opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
+.opt .num { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; background: var(--c); color: #fff; }
+.opt .name { font-weight: 700; }
+.opt .tick { margin-left: auto; width: 28px; height: 28px; border-radius: 6px; border: 3px solid var(--line); display: grid; place-items: center; font-weight: 700; color: transparent; }
+.opt:has(input:checked) { border-color: var(--c, var(--ink)); box-shadow: inset 0 0 0 2px var(--c, var(--ink)); }
+.opt:has(input:checked) .tick { background: var(--c, var(--ink)); border-color: var(--c, var(--ink)); color: #fff; }
+.opt:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
+.opt.none { --c: var(--ink); }
+.opt.none .num { background: transparent; border: 3px solid var(--line); color: var(--muted); }
+.opt.none:has(input:checked) .tick { color: var(--on-ink); }
+.i1 { --c: var(--i1); } .i2 { --c: var(--i2); } .i3 { --c: var(--i3); } .i4 { --c: var(--i4); } .i5 { --c: var(--i5); } .i6 { --c: var(--i6); }
+.err { color: var(--danger); font-weight: 700; min-height: 1.5em; }
+
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); vertical-align: top; }
+th { font-family: var(--font-display); }
+.wrap { overflow-x: auto; max-width: 100%; }
+.status { color: var(--muted); }
+pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overflow-x: auto; font-size: .85rem; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<main>
+  <header>
+    <h1>Teste de Tradução em Libras</h1>
+    <p class="lead">Você vai assistir a um vídeo com 6 intérpretes. O vídeo para sozinho no fim de cada frase. Marque as traduções que ficaram boas. Você pode marcar mais de uma.</p>
+  </header>
+
+  <div class="frame" id="frame">
+    <div id="yt"></div>
+    <div class="demo" id="demo" hidden>
+      <strong>Prévia sem o vídeo do YouTube</strong>
+      <div class="clock" id="clock">0:00</div>
+      <div class="bar" id="bar"><i id="barfill"></i></div>
+      <button class="btn" type="button" id="demoToggle">Reproduzir</button>
+      <small>Nesta prévia o relógio faz o papel do vídeo. Na página hospedada fora do Claude, o vídeo do YouTube aparece aqui.</small>
+    </div>
+  </div>
+
+  <ol class="steps" id="steps" aria-label="Progresso"></ol>
+
+  <section class="box" id="intro">
+    <h2>Antes de começar</h2>
+    <ol class="how">
+      <li>Aperte Começar e assista ao vídeo.</li>
+      <li>No fim de cada frase o vídeo para.</li>
+      <li>Marque quais intérpretes traduziram bem. Se nenhum ficou bom, marque “Nenhuma”.</li>
+    </ol>
+    <label class="field" for="pid">Seu nome ou código
+      <input type="text" id="pid" autocomplete="off" placeholder="Exemplo: P01">
+      <span class="hint">Opcional. Serve para identificar suas respostas.</span>
+    </label>
+    <div class="actions"><button class="btn" type="button" id="start">Começar</button></div>
+  </section>
+
+  <section class="box" id="watching" hidden>
+    <p><strong id="watchLabel"></strong></p>
+    <p class="status">Assista até o vídeo parar.</p>
+  </section>
+
+  <form class="box" id="ask" hidden novalidate>
+    <fieldset>
+      <legend id="askTitle"></legend>
+      <div class="grid" id="options"></div>
+      <label class="opt none" for="none">
+        <input type="checkbox" id="none" name="none" value="none">
+        <span class="num" aria-hidden="true">0</span>
+        <span class="name">Nenhuma ficou boa</span>
+        <span class="tick" aria-hidden="true">✓</span>
+      </label>
+    </fieldset>
+    <div class="err" id="err" role="alert"></div>
+    <div class="actions">
+      <button class="btn ghost" type="button" id="replay">Rever esta frase</button>
+      <button class="btn" type="submit" id="confirm">Confirmar e continuar</button>
+    </div>
+  </form>
+
+  <section class="box" id="done" hidden>
+    <h2>Obrigado!</h2>
+    <p id="sendStatus" class="status"></p>
+    <div class="wrap"><table><thead><tr><th>Frase</th><th>Traduções marcadas como boas</th></tr></thead><tbody id="summary"></tbody></table></div>
+    <div class="actions">
+      <button class="btn ghost" type="button" id="copyCsv">Copiar respostas (CSV)</button>
+      <button class="btn ghost" type="button" id="again">Refazer o teste</button>
+    </div>
+    <pre id="csv" hidden></pre>
+  </section>
+</main>
+
+<script>
+/* ===== CONFIGURAÇÃO ===== */
+const CONFIG = {
+  videoId: "CKiZ_DksZS4",
+  endpoint: "",            // URL do Google Apps Script (deixe vazio para só mostrar o resultado)
+  interpreters: 6,
+  questions: [
+    { t: 5,  label: "Frase 1" },
+    { t: 15, label: "Frase 2" },
+    { t: 20, label: "Frase 3" }
+  ]
+};
+
+const $ = (id) => document.getElementById(id);
+const Q = CONFIG.questions;
+let stage = "intro", idx = 0, answers = [], adapter = null, yt = null;
+
+/* ===== Montagem da tela ===== */
+function mmss(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+
+function buildOptions() {
+  let html = "";
+  for (let n = 1; n <= CONFIG.interpreters; n++) {
+    html += '<label class="opt i' + n + '" for="o' + n + '">' +
+      '<input type="checkbox" id="o' + n + '" name="opt" value="' + n + '">' +
+      '<span class="num" aria-hidden="true">' + n + '</span>' +
+      '<span class="name">Intérprete ' + n + '</span>' +
+      '<span class="tick" aria-hidden="true">✓</span></label>';
+  }
+  $("options").innerHTML = html;
+}
+
+function renderSteps() {
+  $("steps").innerHTML = Q.map(function (q, i) {
+    const done = i < answers.length;
+    const cur = stage !== "intro" && stage !== "done" && i === idx;
+    return '<li class="' + (done ? "done" : "") + '"' + (cur ? ' aria-current="step"' : "") + '>' + q.label + '</li>';
+  }).join("");
+}
+
+function show(which) {
+  stage = which;
+  $("intro").hidden = which !== "intro";
+  $("watching").hidden = which !== "watching";
+  $("ask").hidden = which !== "asking";
+  $("done").hidden = which !== "done";
+  renderSteps();
+}
+
+/* ===== Player: YouTube (real) ou relógio (prévia) ===== */
+function useYouTube() {
+  adapter = {
+    kind: "yt",
+    time: function () { return yt.getCurrentTime ? yt.getCurrentTime() : 0; },
+    seek: function (s) { yt.seekTo(s, true); },
+    play: function () { yt.playVideo(); },
+    pause: function () { yt.pauseVideo(); },
+    playing: function () { return yt.getPlayerState && yt.getPlayerState() === 1; }
+  };
+}
+
+function useDemo() {
+  if (adapter) return;
+  $("yt").hidden = true;
+  $("demo").hidden = false;
+  const total = Q[Q.length - 1].t + 5;
+  let t = 0, on = false;
+  Q.forEach(function (q) {
+    const m = document.createElement("b");
+    m.style.left = (q.t / total * 100) + "%";
+    $("bar").appendChild(m);
+  });
+  function paint() {
+    $("clock").textContent = mmss(t) + " / " + mmss(total);
+    $("barfill").style.width = Math.min(100, t / total * 100) + "%";
+    $("demoToggle").textContent = on ? "Pausar" : "Reproduzir";
+  }
+  setInterval(function () { if (on && t < total) { t += 0.1; paint(); } }, 100);
+  adapter = {
+    kind: "demo",
+    time: function () { return t; },
+    seek: function (s) { t = s; paint(); },
+    play: function () { on = true; paint(); },
+    pause: function () { on = false; paint(); },
+    playing: function () { return on; }
+  };
+  $("demoToggle").onclick = function () { on ? adapter.pause() : adapter.play(); };
+  paint();
+}
+
+function loadYouTube() {
+  window.onYouTubeIframeAPIReady = function () {
+    if (adapter) return;
+    yt = new YT.Player("yt", {
+      videoId: CONFIG.videoId,
+      playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
+      events: {
+        onReady: useYouTube,
+        onStateChange: function (e) { if (e.data === 1 && stage === "intro") startWatching(); }
+      }
+    });
+  };
+  const s = document.createElement("script");
+  s.src = "https://www.youtube.com/iframe_api";
+  s.onerror = useDemo;
+  document.head.appendChild(s);
+  setTimeout(function () { if (!adapter && !(window.YT && window.YT.Player)) useDemo(); }, 3500);
+}
+
+/* ===== Fluxo do teste ===== */
+function startWatching() {
+  show("watching");
+  $("watchLabel").textContent = "Assistindo: " + Q[idx].label;
+}
+
+function askQuestion() {
+  const q = Q[idx];
+  if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
+  $("askTitle").textContent = q.label + ": quais traduções ficaram boas?";
+  document.querySelectorAll('#ask input').forEach(function (i) { i.checked = false; });
+  $("err").textContent = "";
+  show("asking");
+  $("ask").scrollIntoView({ block: "nearest", behavior: "smooth" });
+}
+
+function tick() {
+  if (!adapter || stage === "intro" || stage === "done") return;
+  const q = Q[idx];
+  if (adapter.playing() && adapter.time() >= q.t) {
+    adapter.pause();
+    if (stage !== "asking") askQuestion();
+    else if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
+  }
+}
+setInterval(tick, 150);
+
+$("start").onclick = function () {
+  if (!adapter) return;
+  adapter.seek(0);
+  adapter.play();
+  startWatching();
+};
+
+$("replay").onclick = function () {
+  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
+  adapter.play();
+};
+
+$("none").onchange = function () {
+  if (this.checked) document.querySelectorAll('input[name="opt"]').forEach(function (i) { i.checked = false; });
+};
+$("options").addEventListener("change", function (e) {
+  if (e.target.checked) $("none").checked = false;
+});
+
+$("ask").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const picked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return Number(i.value); });
+  const none = $("none").checked;
+  if (!picked.length && !none) {
+    $("err").textContent = "Marque pelo menos uma opção, ou “Nenhuma ficou boa”.";
+    return;
+  }
+  answers.push({ label: Q[idx].label, t: Q[idx].t, picked: picked, none: none });
+  idx++;
+  if (idx >= Q.length) return finish();
+  startWatching();
+  adapter.play();
+});
+
+function csvText() {
+  const pid = ($("pid").value || "").trim() || "sem-id";
+  const lines = ["participante,frase,segundo,interpretes_bons,nenhuma"];
+  answers.forEach(function (a) {
+    lines.push([pid, a.label, a.t, a.picked.join(";"), a.none ? "sim" : "nao"].join(","));
+  });
+  return lines.join("\n");
+}
+
+function finish() {
+  adapter.pause();
+  show("done");
+  $("summary").innerHTML = answers.map(function (a) {
+    const txt = a.none ? "Nenhuma" : a.picked.map(function (n) { return "Intérprete " + n; }).join(", ");
+    return "<tr><td>" + a.label + "</td><td>" + txt + "</td></tr>";
+  }).join("");
+  $("csv").textContent = csvText();
+  const pid = ($("pid").value || "").trim() || "sem-id";
+  if (!CONFIG.endpoint) {
+    $("sendStatus").textContent = "Respostas registradas nesta tela. O envio para a planilha ainda não está configurado.";
+    return;
+  }
+  $("sendStatus").textContent = "Enviando respostas…";
+  fetch(CONFIG.endpoint, {
+    method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ participante: pid, enviadoEm: new Date().toISOString(), respostas: answers })
+  }).then(function () { $("sendStatus").textContent = "Respostas enviadas. Pode fechar esta página."; })
+    .catch(function () { $("sendStatus").textContent = "Não foi possível enviar. Copie as respostas abaixo e mande para a pesquisadora."; $("csv").hidden = false; });
+}
+
+$("copyCsv").onclick = function () {
+  const txt = csvText();
+  $("csv").hidden = false;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(function () { $("copyCsv").textContent = "Copiado"; }, function () {});
+  }
+};
+
+$("again").onclick = function () {
+  idx = 0; answers = [];
+  $("csv").hidden = true; $("copyCsv").textContent = "Copiar respostas (CSV)";
+  adapter.pause(); adapter.seek(0);
+  show("intro");
+};
+
+buildOptions();
+renderSteps();
+loadYouTube();
+</script>
+
+</body>
+</html>
