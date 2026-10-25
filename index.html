@@ -3,15 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 </head>
 <body>
-<title>Teste de Tradução em Libras</title>
+<title>Pesquisa de estratégias de tradução - Oração Eucarística III</title>
 <meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Familjen+Grotesk:wght@600;700&display=swap">
 <style>
-/* Layout: coluna única. Vídeo no topo, etapas em fichas, painel de resposta embaixo com 6 cartões grandes (2x3 no celular, 3x2 no desktop). */
+/* Layout: coluna única. Vídeo no topo, barra fina de progresso (só números), formulário de entrada e painel de resposta com 6 cartões (Tradução A a F). */
 :root {
   --bg: #EDF1F4;
   --surface: #FFFFFF;
@@ -50,10 +52,9 @@ body {
 }
 main { max-width: 960px; margin: 0 auto; display: grid; gap: 20px; }
 h1, h2 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
-h1 { font-size: clamp(1.7rem, 4vw, 2.4rem); }
+h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); }
 h2 { font-size: 1.4rem; }
 p { margin: 0; }
-.lead { color: var(--muted); max-width: 62ch; margin-top: 8px; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
 .frame { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; max-width: 100%; }
@@ -67,19 +68,26 @@ p { margin: 0; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #EAF0F4; border-radius: 4px; width: 0; }
 .bar b { position: absolute; top: -4px; width: 3px; height: 16px; background: #FB923C; }
 
-.steps { display: flex; flex-wrap: wrap; gap: 8px; list-style: none; margin: 0; padding: 0; }
-.steps li { padding: 6px 14px; border: 2px solid var(--line); border-radius: 999px; font-weight: 700; font-size: .95rem; color: var(--muted); background: var(--surface); }
-.steps li[aria-current="step"] { border-color: var(--ink); color: var(--fg); }
-.steps li.done { border-color: var(--ok); color: var(--ok); }
-.steps li.done::before { content: "✓ "; }
+.prog { display: flex; align-items: center; gap: 12px; }
+.segs { flex: 1; min-width: 0; display: flex; }
+.segs i { flex: 1; height: 10px; border-radius: 2px; background: var(--line); }
+.segs i.done { background: var(--ok); }
+.segs i.cur { background: var(--ink); }
+.count { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .95rem; color: var(--muted); white-space: nowrap; }
 
-.box { background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 16px; }
+.box { background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 18px; }
 .box[hidden] { display: none; }
-.how { margin: 0; padding-left: 1.2em; display: grid; gap: 4px; }
-label.field { display: grid; gap: 6px; font-weight: 700; }
-input[type="text"] { font: inherit; padding: 12px 14px; border-radius: 8px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); max-width: 420px; }
-input[type="text"]:focus-visible { outline: 3px solid var(--focus); }
+label.field, fieldset.field { display: grid; gap: 6px; font-weight: 700; }
+.flab { padding: 0; font-weight: 700; }
+input[type="text"], input[type="tel"], select { font: inherit; padding: 12px 14px; border-radius: 8px; border: 2px solid var(--line); background: var(--bg); color: var(--fg); width: 100%; max-width: 420px; min-height: 52px; }
+select { appearance: auto; }
 .hint { color: var(--muted); font-weight: 400; font-size: .9rem; }
+.phone { display: grid; grid-template-columns: 96px minmax(0, 260px); gap: 12px; }
+.phone label { display: grid; gap: 4px; font-weight: 400; font-size: .9rem; color: var(--muted); }
+.check { display: flex; gap: 12px; align-items: flex-start; cursor: pointer; }
+.check input { width: 26px; height: 26px; flex: none; margin: 2px 0 0; accent-color: var(--ink); }
+.resume { display: grid; gap: 12px; padding: 14px; border: 2px dashed var(--line); border-radius: 10px; }
+.resume[hidden] { display: none; }
 
 .btn { font: inherit; font-weight: 700; padding: 14px 22px; border-radius: 8px; border: 2px solid var(--ink); background: var(--ink); color: var(--on-ink); cursor: pointer; min-height: 52px; }
 .btn.ghost { background: transparent; color: var(--fg); }
@@ -88,34 +96,46 @@ input[type="text"]:focus-visible { outline: 3px solid var(--focus); }
 
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 14px; }
 legend { padding: 0; margin-bottom: 4px; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; text-wrap: balance; }
+fieldset.field legend { font-family: var(--font-body); font-size: 1rem; margin-bottom: 6px; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; }
-.opt { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px; border: 3px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); min-height: 72px; }
+.grid.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); max-width: 420px; }
+.opt { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px; border: 3px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); min-height: 72px; --c: var(--ink); }
 .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; margin: 0; cursor: pointer; }
 .opt .num { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; background: var(--c); color: #fff; }
 .opt .name { font-weight: 700; }
-.opt .tick { margin-left: auto; width: 28px; height: 28px; border-radius: 6px; border: 3px solid var(--line); display: grid; place-items: center; font-weight: 700; color: transparent; }
-.opt:has(input:checked) { border-color: var(--c, var(--ink)); box-shadow: inset 0 0 0 2px var(--c, var(--ink)); }
-.opt:has(input:checked) .tick { background: var(--c, var(--ink)); border-color: var(--c, var(--ink)); color: #fff; }
+.opt .sub { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); }
+.opt .tick { margin-left: auto; width: 28px; height: 28px; border-radius: 6px; border: 3px solid var(--line); display: grid; place-items: center; font-weight: 700; color: transparent; flex: none; }
+.opt.radio .tick { border-radius: 50%; }
+.opt:has(input:checked) { border-color: var(--c); box-shadow: inset 0 0 0 2px var(--c); }
+.opt:has(input:checked) .tick { background: var(--c); border-color: var(--c); color: #fff; }
 .opt:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
-.opt.none { --c: var(--ink); }
 .opt.none .num { background: transparent; border: 3px solid var(--line); color: var(--muted); }
-.opt.none:has(input:checked) .tick { color: var(--on-ink); }
+.opt.none:has(input:checked) .tick, .opt.radio:has(input:checked) .tick { color: var(--on-ink); }
+.opt.off { opacity: .38; cursor: not-allowed; border-style: dashed; background: transparent; }
+.opt.off input { cursor: not-allowed; }
 .i1 { --c: var(--i1); } .i2 { --c: var(--i2); } .i3 { --c: var(--i3); } .i4 { --c: var(--i4); } .i5 { --c: var(--i5); } .i6 { --c: var(--i6); }
 .err { color: var(--danger); font-weight: 700; min-height: 1.5em; }
 
 table { border-collapse: collapse; width: 100%; }
 th, td { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); vertical-align: top; }
 th { font-family: var(--font-display); }
-.wrap { overflow-x: auto; max-width: 100%; }
+.wrap { overflow-x: auto; max-width: 100%; max-height: 420px; overflow-y: auto; }
 .status { color: var(--muted); }
-pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overflow-x: auto; font-size: .85rem; }
+header { display: grid; gap: 6px; }
+.by { font-weight: 700; color: var(--muted); letter-spacing: .03em; }
+.thanks { border-top: 2px solid var(--line); padding-top: 20px; display: grid; gap: 12px; }
+.thanks .verse { font-style: italic; }
+.thanks .links { display: grid; gap: 12px; border-top: 2px solid var(--line); padding-top: 16px; }
+.thanks .lk { font-weight: 700; }
+.thanks a { color: var(--focus); overflow-wrap: anywhere; }
+pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overflow-x: auto; font-size: .85rem; max-height: 320px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
 <main>
   <header>
-    <h1>Teste de Tradução em Libras</h1>
-    <p class="lead">Você vai assistir a um vídeo com 6 intérpretes. O vídeo para sozinho no fim de cada frase. Marque as traduções que ficaram boas. Você pode marcar mais de uma.</p>
+    <h1>Pesquisa de estratégias de tradução - Oração Eucarística III</h1>
+    <p class="by">CATLIBRAS - Pastoral do Surdo de Brasília</p>
   </header>
 
   <div class="frame" id="frame">
@@ -129,24 +149,59 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
     </div>
   </div>
 
-  <ol class="steps" id="steps" aria-label="Progresso"></ol>
+  <div class="prog">
+    <div class="segs" id="segs" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuenow="0"></div>
+    <span class="count" id="count">0 / 0</span>
+  </div>
 
-  <section class="box" id="intro">
-    <h2>Antes de começar</h2>
-    <ol class="how">
-      <li>Aperte Começar e assista ao vídeo.</li>
-      <li>No fim de cada frase o vídeo para.</li>
-      <li>Marque quais intérpretes traduziram bem. Se nenhum ficou bom, marque “Nenhuma”.</li>
-    </ol>
-    <label class="field" for="pid">Seu nome ou código
-      <input type="text" id="pid" autocomplete="off" placeholder="Exemplo: P01">
-      <span class="hint">Opcional. Serve para identificar suas respostas.</span>
+  <form class="box" id="intro" novalidate>
+    <div class="resume" id="resume" hidden>
+      <p id="resumeText"></p>
+      <div class="actions">
+        <button class="btn" type="button" id="resumeGo">Continuar de onde parei</button>
+        <button class="btn ghost" type="button" id="resumeNew">Começar de novo</button>
+      </div>
+    </div>
+
+    <label class="field" for="pname">Seu nome
+      <input type="text" id="pname" autocomplete="name">
     </label>
-    <div class="actions"><button class="btn" type="button" id="start">Começar</button></div>
-  </section>
+
+    <fieldset class="field">
+      <legend class="flab">Você é</legend>
+      <div class="grid two">
+        <label class="opt radio" for="tSurdo"><input type="radio" id="tSurdo" name="tipo" value="Surdo"><span class="name">Surdo</span><span class="tick" aria-hidden="true">✓</span></label>
+        <label class="opt radio" for="tOuvinte"><input type="radio" id="tOuvinte" name="tipo" value="Ouvinte"><span class="name">Ouvinte</span><span class="tick" aria-hidden="true">✓</span></label>
+      </div>
+    </fieldset>
+
+    <label class="field" for="pstate">Estado
+      <select id="pstate"></select>
+    </label>
+
+    <fieldset class="field">
+      <legend class="flab">WhatsApp (opcional)</legend>
+      <div class="phone">
+        <label for="pddd">DDD<input type="tel" id="pddd" inputmode="numeric" maxlength="2" autocomplete="off" placeholder="61"></label>
+        <label for="pnum">Número<input type="tel" id="pnum" inputmode="numeric" maxlength="9" autocomplete="off" placeholder="999999999"></label>
+      </div>
+      <span class="hint">DDD com 2 números e telefone com 9 números, sem espaços.</span>
+    </fieldset>
+
+    <label class="field" for="pcode">Código de acesso
+      <input type="text" id="pcode" autocomplete="off" autocapitalize="characters">
+    </label>
+
+    <label class="check" for="pok">
+      <input type="checkbox" id="pok">
+      <span id="consentText"></span>
+    </label>
+
+    <div class="err" id="introErr" role="alert"></div>
+    <div class="actions"><button class="btn" type="submit" id="start">Começar</button></div>
+  </form>
 
   <section class="box" id="watching" hidden>
-    <p><strong id="watchLabel"></strong></p>
     <p class="status">Assista até o vídeo parar.</p>
   </section>
 
@@ -163,7 +218,7 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
     </fieldset>
     <div class="err" id="err" role="alert"></div>
     <div class="actions">
-      <button class="btn ghost" type="button" id="replay">Rever esta frase</button>
+      <button class="btn ghost" type="button" id="replay">Rever trecho</button>
       <button class="btn" type="submit" id="confirm">Confirmar e continuar</button>
     </div>
   </form>
@@ -171,12 +226,23 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
   <section class="box" id="done" hidden>
     <h2>Obrigado!</h2>
     <p id="sendStatus" class="status"></p>
-    <div class="wrap"><table><thead><tr><th>Frase</th><th>Traduções marcadas como boas</th></tr></thead><tbody id="summary"></tbody></table></div>
+    <div class="actions"><button class="btn" type="button" id="retry" hidden>Tentar enviar de novo</button></div>
+    <div class="wrap"><table><thead><tr><th>Nº</th><th>Traduções marcadas como boas</th></tr></thead><tbody id="summary"></tbody></table></div>
     <div class="actions">
       <button class="btn ghost" type="button" id="copyCsv">Copiar respostas (CSV)</button>
       <button class="btn ghost" type="button" id="again">Refazer o teste</button>
     </div>
     <pre id="csv" hidden></pre>
+    <div class="thanks">
+      <p><strong>💙 A Equipe CATLIBRAS agradece sua participação!</strong></p>
+      <p>Fique atento(a) ao nosso canal, pois em breve divulgaremos os resultados da pesquisa!</p>
+      <p class="verse">“Conservemo-nos firmemente apegados à nossa esperança, porque é fiel aquele cuja promessa aguardamos.”<br>Hebreus 10, 23</p>
+      <p>Com carinho e gratidão,<br><strong>Equipe CATLIBRAS</strong></p>
+      <div class="links">
+        <p><span class="lk">Canal no Whatsapp:</span><br><a href="https://whatsapp.com/channel/0029VaGE5bbHwXb8n4YcpC3G" target="_blank" rel="noopener">https://whatsapp.com/channel/0029VaGE5bbHwXb8n4YcpC3G</a></p>
+        <p><span class="lk">Fórum CatLIBRAS no Telegram:</span><br><a href="https://t.me/+HBcOID9aNCZlMDc5" target="_blank" rel="noopener">https://t.me/+HBcOID9aNCZlMDc5</a></p>
+      </div>
+    </div>
   </section>
 </main>
 
@@ -184,40 +250,64 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
 /* ===== CONFIGURAÇÃO ===== */
 const CONFIG = {
   videoId: "CKiZ_DksZS4",
-  endpoint: "",            // URL do Google Apps Script (deixe vazio para só mostrar o resultado)
-  interpreters: 6,
-  questions: [
-    { t: 5,  label: "Frase 1" },
-    { t: 15, label: "Frase 2" },
-    { t: 20, label: "Frase 3" }
+  endpoint: "https://script.google.com/macros/s/AKfycbw5adPRI4jf5S7Ex5oJKjyHpB84wEI-nFVYB7VJkbdsu5J1jVW0SOv7OiApO7cjjznfgg/exec",             // URL do Google Apps Script (vazio = só mostra o resultado na tela)
+  codigo: "OE3",            // código de acesso
+  consentimento: "Concordo voluntariamente em participar desta pesquisa. Autorizo o uso das minhas respostas para fins de estudo, ciente de que meu nome e WhatsApp serão acessados apenas pela equipe. O uso da minha imagem na internet dependerá de minha autorização prévia.",
+  traducoes: ["A", "B", "C", "D", "E", "F"],
+  /* t = segundo do vídeo em que o bloco termina (o vídeo para ali).
+     ausentes = traduções que não aparecem naquele bloco (ficam esmaecidas). */
+  blocos: [
+    { t: 5,  ausentes: [] },
+    { t: 15, ausentes: ["C", "F"] },
+    { t: 20, ausentes: [] }
   ]
 };
 
+const UFS = [["AC","Acre"],["AL","Alagoas"],["AP","Amapá"],["AM","Amazonas"],["BA","Bahia"],["CE","Ceará"],["DF","Distrito Federal"],["ES","Espírito Santo"],["GO","Goiás"],["MA","Maranhão"],["MT","Mato Grosso"],["MS","Mato Grosso do Sul"],["MG","Minas Gerais"],["PA","Pará"],["PB","Paraíba"],["PR","Paraná"],["PE","Pernambuco"],["PI","Piauí"],["RJ","Rio de Janeiro"],["RN","Rio Grande do Norte"],["RS","Rio Grande do Sul"],["RO","Rondônia"],["RR","Roraima"],["SC","Santa Catarina"],["SP","São Paulo"],["SE","Sergipe"],["TO","Tocantins"]];
+
 const $ = (id) => document.getElementById(id);
-const Q = CONFIG.questions;
+const Q = CONFIG.blocos, L = CONFIG.traducoes, N = Q.length;
+const KEY = "oe3-pesquisa-v1";
 let stage = "intro", idx = 0, answers = [], adapter = null, yt = null;
+let sid = "", profile = null, outbox = [], shownAt = 0, replays = 0, flushing = false;
+
+/* ===== Salvamento no navegador (para continuar de onde parou) ===== */
+function loadSaved() {
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && s.n === N && s.profile) return s; } catch (e) {}
+  return null;
+}
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify({ n: N, sid: sid, profile: profile, answers: answers, outbox: outbox })); } catch (e) {}
+}
+function clearSaved() { try { localStorage.removeItem(KEY); } catch (e) {} }
 
 /* ===== Montagem da tela ===== */
 function mmss(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
 
-function buildOptions() {
-  let html = "";
-  for (let n = 1; n <= CONFIG.interpreters; n++) {
-    html += '<label class="opt i' + n + '" for="o' + n + '">' +
-      '<input type="checkbox" id="o' + n + '" name="opt" value="' + n + '">' +
-      '<span class="num" aria-hidden="true">' + n + '</span>' +
-      '<span class="name">Intérprete ' + n + '</span>' +
+function buildStatic() {
+  $("pstate").innerHTML = '<option value="">Selecione</option>' + UFS.map(function (u) { return '<option value="' + u[0] + '">' + u[1] + '</option>'; }).join("");
+  $("consentText").textContent = CONFIG.consentimento;
+  $("options").innerHTML = L.map(function (l, i) {
+    return '<label class="opt i' + (i + 1) + '" id="lab' + l + '" for="o' + l + '">' +
+      '<input type="checkbox" id="o' + l + '" name="opt" value="' + l + '">' +
+      '<span class="num" aria-hidden="true">' + l + '</span>' +
+      '<span class="name">Tradução ' + l + '<span class="sub" hidden>indisponível</span></span>' +
       '<span class="tick" aria-hidden="true">✓</span></label>';
-  }
-  $("options").innerHTML = html;
+  }).join("");
+  $("segs").style.gap = (N > 80 ? 1 : 2) + "px";
+  $("segs").innerHTML = Q.map(function () { return "<i></i>"; }).join("");
+  $("segs").setAttribute("aria-valuemax", N);
 }
 
-function renderSteps() {
-  $("steps").innerHTML = Q.map(function (q, i) {
-    const done = i < answers.length;
-    const cur = stage !== "intro" && stage !== "done" && i === idx;
-    return '<li class="' + (done ? "done" : "") + '"' + (cur ? ' aria-current="step"' : "") + '>' + q.label + '</li>';
-  }).join("");
+function renderProgress() {
+  const active = stage === "watching" || stage === "asking";
+  const segs = $("segs").children;
+  for (let i = 0; i < segs.length; i++) {
+    segs[i].className = i < answers.length ? "done" : (active && i === idx ? "cur" : "");
+  }
+  const shown = stage === "done" ? N : (active ? idx + 1 : answers.length);
+  $("count").textContent = shown + " / " + N;
+  $("segs").setAttribute("aria-valuenow", answers.length);
 }
 
 function show(which) {
@@ -226,7 +316,7 @@ function show(which) {
   $("watching").hidden = which !== "watching";
   $("ask").hidden = which !== "asking";
   $("done").hidden = which !== "done";
-  renderSteps();
+  renderProgress();
 }
 
 /* ===== Player: YouTube (real) ou relógio (prévia) ===== */
@@ -245,7 +335,7 @@ function useDemo() {
   if (adapter) return;
   $("yt").hidden = true;
   $("demo").hidden = false;
-  const total = Q[Q.length - 1].t + 5;
+  const total = Q[N - 1].t + 5;
   let t = 0, on = false;
   Q.forEach(function (q) {
     const m = document.createElement("b");
@@ -266,7 +356,7 @@ function useDemo() {
     pause: function () { on = false; paint(); },
     playing: function () { return on; }
   };
-  $("demoToggle").onclick = function () { on ? adapter.pause() : adapter.play(); };
+  $("demoToggle").onclick = function () { if (stage === "intro") { $("introErr").textContent = "Preencha os dados e aperte Começar."; return; } on ? adapter.pause() : adapter.play(); };
   paint();
 }
 
@@ -278,7 +368,13 @@ function loadYouTube() {
       playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
       events: {
         onReady: useYouTube,
-        onStateChange: function (e) { if (e.data === 1 && stage === "intro") startWatching(); }
+        onStateChange: function (e) {
+          if (e.data === 1 && stage === "intro") {
+            yt.pauseVideo();
+            yt.seekTo(0, true);
+            $("introErr").textContent = "Preencha os dados e aperte Começar.";
+          }
+        }
       }
     });
   };
@@ -289,18 +385,53 @@ function loadYouTube() {
   setTimeout(function () { if (!adapter && !(window.YT && window.YT.Player)) useDemo(); }, 3500);
 }
 
+/* ===== Envio das respostas (uma a uma) ===== */
+async function flush() {
+  if (!CONFIG.endpoint || flushing) return;
+  flushing = true;
+  try {
+    while (outbox.length) {
+      await fetch(CONFIG.endpoint, {
+        method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(outbox[0])
+      });
+      outbox.shift();
+      save();
+    }
+  } catch (e) {}
+  flushing = false;
+  if (stage === "done") sendMessage();
+}
+
+function sendMessage() {
+  const pending = outbox.length > 0;
+  $("retry").hidden = !(CONFIG.endpoint && pending);
+  if (!CONFIG.endpoint) $("sendStatus").textContent = "Respostas registradas nesta tela. O envio para a planilha ainda não está configurado.";
+  else if (pending) $("sendStatus").textContent = "Algumas respostas ainda não foram enviadas. Confira a internet e aperte o botão abaixo.";
+  else { $("sendStatus").textContent = "Respostas enviadas. Pode fechar esta página."; clearSaved(); }
+}
+
 /* ===== Fluxo do teste ===== */
 function startWatching() {
   show("watching");
-  $("watchLabel").textContent = "Assistindo: " + Q[idx].label;
 }
 
 function askQuestion() {
   const q = Q[idx];
   if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
-  $("askTitle").textContent = q.label + ": quais traduções ficaram boas?";
-  document.querySelectorAll('#ask input').forEach(function (i) { i.checked = false; });
+  $("askTitle").textContent = "Bloco " + (idx + 1) + ": quais traduções ficaram boas?";
+  L.forEach(function (l) {
+    const off = (q.ausentes || []).indexOf(l) >= 0;
+    const lab = $("lab" + l), inp = $("o" + l);
+    lab.classList.toggle("off", off);
+    inp.disabled = off;
+    inp.checked = false;
+    lab.querySelector(".sub").hidden = !off;
+  });
+  $("none").checked = false;
   $("err").textContent = "";
+  replays = 0;
+  shownAt = Date.now();
   show("asking");
   $("ask").scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
@@ -316,18 +447,62 @@ function tick() {
 }
 setInterval(tick, 150);
 
-$("start").onclick = function () {
-  if (!adapter) return;
-  adapter.seek(0);
+function begin(fromIdx) {
+  if (fromIdx > 0) { idx = fromIdx; adapter.seek(Q[fromIdx - 1].t); } else { idx = 0; adapter.seek(0); }
   adapter.play();
   startWatching();
-};
+}
 
-$("replay").onclick = function () {
-  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
-  adapter.play();
-};
+/* ----- Formulário de entrada ----- */
+function digits(el) { el.addEventListener("input", function () { el.value = el.value.replace(/\D/g, ""); }); }
+digits($("pddd")); digits($("pnum"));
 
+function validateIntro() {
+  const nome = $("pname").value.trim();
+  const tipo = document.querySelector('input[name="tipo"]:checked');
+  const ddd = $("pddd").value, num = $("pnum").value;
+  if (!nome) return { msg: "Escreva seu nome.", el: $("pname") };
+  if (!tipo) return { msg: "Escolha Surdo ou Ouvinte.", el: $("tSurdo") };
+  if (!$("pstate").value) return { msg: "Escolha seu estado.", el: $("pstate") };
+  if ((ddd || num) && (ddd.length !== 2 || num.length !== 9)) return { msg: "WhatsApp: escreva o DDD com 2 números e o telefone com 9 números, ou deixe os dois em branco.", el: ddd.length !== 2 ? $("pddd") : $("pnum") };
+  if ($("pcode").value.trim().toUpperCase() !== CONFIG.codigo.toUpperCase()) return { msg: "Código de acesso incorreto.", el: $("pcode") };
+  if (!$("pok").checked) return { msg: "Marque que você concorda em participar.", el: $("pok") };
+  return null;
+}
+
+$("intro").addEventListener("submit", function (e) {
+  e.preventDefault();
+  const bad = validateIntro();
+  if (bad) { $("introErr").textContent = bad.msg; bad.el.focus(); return; }
+  if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e aperte Começar de novo."; return; }
+  $("introErr").textContent = "";
+  profile = {
+    nome: $("pname").value.trim(),
+    tipo: document.querySelector('input[name="tipo"]:checked').value,
+    estado: $("pstate").value,
+    whatsapp: $("pddd").value + $("pnum").value
+  };
+  sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  answers = []; outbox = [];
+  save();
+  begin(0);
+});
+
+/* ----- Continuar de onde parou ----- */
+function offerResume(saved) {
+  $("resumeText").textContent = "Você já respondeu " + saved.answers.length + " de " + N + ". Quer continuar de onde parou?";
+  $("resume").hidden = false;
+  $("resumeGo").onclick = function () {
+    if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e tente de novo."; return; }
+    sid = saved.sid; profile = saved.profile; answers = saved.answers; outbox = saved.outbox || [];
+    $("introErr").textContent = "";
+    flush();
+    begin(answers.length);
+  };
+  $("resumeNew").onclick = function () { clearSaved(); $("resume").hidden = true; };
+}
+
+/* ----- Resposta de cada bloco ----- */
 $("none").onchange = function () {
   if (this.checked) document.querySelectorAll('input[name="opt"]').forEach(function (i) { i.checked = false; });
 };
@@ -335,69 +510,91 @@ $("options").addEventListener("change", function (e) {
   if (e.target.checked) $("none").checked = false;
 });
 
+$("replay").onclick = function () {
+  replays++;
+  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
+  adapter.play();
+};
+
 $("ask").addEventListener("submit", function (e) {
   e.preventDefault();
-  const picked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return Number(i.value); });
+  const checked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return i.value; });
   const none = $("none").checked;
-  if (!picked.length && !none) {
+  if (!checked.length && !none) {
     $("err").textContent = "Marque pelo menos uma opção, ou “Nenhuma ficou boa”.";
     return;
   }
-  answers.push({ label: Q[idx].label, t: Q[idx].t, picked: picked, none: none });
+  const q = Q[idx], opcoes = {};
+  L.forEach(function (l) {
+    opcoes[l] = (q.ausentes || []).indexOf(l) >= 0 ? null : (checked.indexOf(l) >= 0 ? 1 : 0);
+  });
+  const rec = { bloco: idx + 1, t: q.t, opcoes: opcoes, nenhuma: none ? 1 : 0, revisoes: replays, segundos: Math.round((Date.now() - shownAt) / 1000) };
+  answers.push(rec);
+  outbox.push({
+    codigo: CONFIG.codigo, sessao: sid, enviadoEm: new Date().toISOString(),
+    nome: profile.nome, tipo: profile.tipo, estado: profile.estado, whatsapp: profile.whatsapp,
+    bloco: rec.bloco, segundo: rec.t, opcoes: rec.opcoes, nenhuma: rec.nenhuma, revisoes: rec.revisoes, segundos: rec.segundos
+  });
+  save();
+  flush();
   idx++;
-  if (idx >= Q.length) return finish();
+  if (idx >= N) return finish();
   startWatching();
   adapter.play();
 });
 
+/* ----- Final ----- */
+function csvCell(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
 function csvText() {
-  const pid = ($("pid").value || "").trim() || "sem-id";
-  const lines = ["participante,frase,segundo,interpretes_bons,nenhuma"];
+  const p = profile || {};
+  const rows = [["nome", "tipo", "estado", "whatsapp", "bloco", "segundo"].concat(L, ["nenhuma", "revisoes", "segundos"])];
   answers.forEach(function (a) {
-    lines.push([pid, a.label, a.t, a.picked.join(";"), a.none ? "sim" : "nao"].join(","));
+    rows.push([p.nome, p.tipo, p.estado, p.whatsapp, a.bloco, a.t].concat(L.map(function (l) { return a.opcoes[l]; }), [a.nenhuma, a.revisoes, a.segundos]));
   });
-  return lines.join("\n");
+  return rows.map(function (r) { return r.map(csvCell).join(","); }).join("\n");
 }
 
 function finish() {
   adapter.pause();
   show("done");
   $("summary").innerHTML = answers.map(function (a) {
-    const txt = a.none ? "Nenhuma" : a.picked.map(function (n) { return "Intérprete " + n; }).join(", ");
-    return "<tr><td>" + a.label + "</td><td>" + txt + "</td></tr>";
+    const boas = L.filter(function (l) { return a.opcoes[l] === 1; });
+    const txt = a.nenhuma ? "Nenhuma" : boas.join(", ");
+    return "<tr><td>" + a.bloco + "</td><td>" + txt + "</td></tr>";
   }).join("");
   $("csv").textContent = csvText();
-  const pid = ($("pid").value || "").trim() || "sem-id";
-  if (!CONFIG.endpoint) {
-    $("sendStatus").textContent = "Respostas registradas nesta tela. O envio para a planilha ainda não está configurado.";
-    return;
-  }
-  $("sendStatus").textContent = "Enviando respostas…";
-  fetch(CONFIG.endpoint, {
-    method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ participante: pid, enviadoEm: new Date().toISOString(), respostas: answers })
-  }).then(function () { $("sendStatus").textContent = "Respostas enviadas. Pode fechar esta página."; })
-    .catch(function () { $("sendStatus").textContent = "Não foi possível enviar. Copie as respostas abaixo e mande para a pesquisadora."; $("csv").hidden = false; });
+  sendMessage();
+  if (CONFIG.endpoint) { $("sendStatus").textContent = "Enviando respostas…"; flush(); }
+  else clearSaved();
 }
 
+$("retry").onclick = function () { $("sendStatus").textContent = "Enviando respostas…"; flush(); };
+
 $("copyCsv").onclick = function () {
-  const txt = csvText();
   $("csv").hidden = false;
   if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(txt).then(function () { $("copyCsv").textContent = "Copiado"; }, function () {});
+    navigator.clipboard.writeText(csvText()).then(function () { $("copyCsv").textContent = "Copiado"; }, function () {});
   }
 };
 
 $("again").onclick = function () {
-  idx = 0; answers = [];
+  idx = 0; answers = []; outbox = [];
   $("csv").hidden = true; $("copyCsv").textContent = "Copiar respostas (CSV)";
+  $("pcode").value = ""; $("pok").checked = false; $("introErr").textContent = "";
   adapter.pause(); adapter.seek(0);
   show("intro");
 };
 
-buildOptions();
-renderSteps();
+/* ===== Início ===== */
+buildStatic();
+renderProgress();
 loadYouTube();
+(function () {
+  const saved = loadSaved();
+  if (!saved) return;
+  if (saved.answers.length > 0 && saved.answers.length < N) offerResume(saved);
+  else if ((saved.outbox || []).length && CONFIG.endpoint) { outbox = saved.outbox; flush().then(function () { if (!outbox.length) clearSaved(); }); }
+})();
 </script>
 
 </body>
