@@ -13,7 +13,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Familjen+Grotesk:wght@600;700&display=swap">
 <style>
-/* Layout: coluna única. Vídeo no topo, barra fina de progresso (só números), formulário de entrada e painel de resposta com 6 cartões (Tradução A a F). */
+/* Layout: coluna única. Vídeo no topo, barra fina de progresso (só números), formulário de entrada, painel de resposta com 6 cartões (Tradução A a F) e botão de sugestão em vídeo. */
 :root {
   --bg: #EDF1F4;
   --surface: #FFFFFF;
@@ -44,6 +44,7 @@
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 body {
   background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 18px; line-height: 1.5;
   padding-block: 24px 48px;
@@ -55,6 +56,8 @@ h1, h2 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wr
 h1 { font-size: clamp(1.6rem, 4vw, 2.3rem); }
 h2 { font-size: 1.4rem; }
 p { margin: 0; }
+header { display: grid; gap: 6px; }
+.by { font-weight: 700; color: var(--muted); letter-spacing: .03em; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 3px; }
 
 .frame { position: relative; aspect-ratio: 16 / 9; background: #000; border-radius: 10px; overflow: hidden; max-width: 100%; }
@@ -67,6 +70,12 @@ p { margin: 0; }
 .bar { position: relative; width: min(420px, 80vw); height: 8px; border-radius: 4px; background: #2D3C48; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #EAF0F4; border-radius: 4px; width: 0; }
 .bar b { position: absolute; top: -4px; width: 3px; height: 16px; background: #FB923C; }
+.shield { position: absolute; inset: 0; background: transparent; }
+.wm { position: absolute; right: 8px; bottom: 8px; max-width: 60%; font-size: .72rem; line-height: 1.2; color: #fff; opacity: .45; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.timer { display: grid; gap: 2px; padding: 12px 16px; border: 2px solid var(--ink); border-radius: 10px; }
+.timer .tlab { font-size: .9rem; color: var(--muted); font-weight: 700; }
+.timer .tval { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
+.ifields { display: grid; gap: 18px; }
 
 .prog { display: flex; align-items: center; gap: 12px; }
 .segs { flex: 1; min-width: 0; display: flex; }
@@ -91,12 +100,17 @@ select { appearance: auto; }
 
 .btn { font: inherit; font-weight: 700; padding: 14px 22px; border-radius: 8px; border: 2px solid var(--ink); background: var(--ink); color: var(--on-ink); cursor: pointer; min-height: 52px; }
 .btn.ghost { background: transparent; color: var(--fg); }
-.btn:hover { filter: brightness(1.12); }
+.btn:hover:not(:disabled) { filter: brightness(1.12); }
+.btn:disabled, select:disabled { opacity: .5; cursor: not-allowed; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.nav { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.nav select { width: auto; min-width: 200px; max-width: 100%; }
 
 fieldset { border: 0; margin: 0; padding: 0; min-width: 0; display: grid; gap: 14px; }
 legend { padding: 0; margin-bottom: 4px; font-family: var(--font-display); font-weight: 700; font-size: 1.35rem; text-wrap: balance; }
 fieldset.field legend { font-family: var(--font-body); font-size: 1rem; margin-bottom: 6px; }
+.qhelp { font-size: .9rem; color: var(--muted); max-width: 62ch; }
+.absnote { font-size: .9rem; color: var(--muted); max-width: 62ch; }
 .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap: 12px; }
 .grid.two { grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr)); max-width: 420px; }
 .opt { position: relative; display: flex; align-items: center; gap: 12px; padding: 14px; border: 3px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); min-height: 72px; --c: var(--ink); }
@@ -108,27 +122,34 @@ fieldset.field legend { font-family: var(--font-body); font-size: 1rem; margin-b
 .opt.radio .tick { border-radius: 50%; }
 .opt:has(input:checked) { border-color: var(--c); box-shadow: inset 0 0 0 2px var(--c); }
 .opt:has(input:checked) .tick { background: var(--c); border-color: var(--c); color: #fff; }
+.opt.radio:has(input:checked) .tick { color: var(--on-ink); }
 .opt:has(input:focus-visible) { outline: 3px solid var(--focus); outline-offset: 3px; }
-.opt.none .num { background: transparent; border: 3px solid var(--line); color: var(--muted); }
-.opt.none:has(input:checked) .tick, .opt.radio:has(input:checked) .tick { color: var(--on-ink); }
 .opt.off { opacity: .38; cursor: not-allowed; border-style: dashed; background: transparent; }
 .opt.off input { cursor: not-allowed; }
+button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
+.opt.sug[data-on="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 2px var(--ink); }
+.opt.sug[data-on="true"] .tick { background: var(--ink); border-color: var(--ink); color: var(--on-ink); }
+.opt.sug:disabled { opacity: .5; cursor: not-allowed; }
 .i1 { --c: var(--i1); } .i2 { --c: var(--i2); } .i3 { --c: var(--i3); } .i4 { --c: var(--i4); } .i5 { --c: var(--i5); } .i6 { --c: var(--i6); }
-.err { color: var(--danger); font-weight: 700; min-height: 1.5em; }
 
-table { border-collapse: collapse; width: 100%; }
-th, td { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); vertical-align: top; }
-th { font-family: var(--font-display); }
-.wrap { overflow-x: auto; max-width: 100%; max-height: 420px; overflow-y: auto; }
-.status { color: var(--muted); }
-header { display: grid; gap: 6px; }
-.by { font-weight: 700; color: var(--muted); letter-spacing: .03em; }
-.thanks { border-top: 2px solid var(--line); padding-top: 20px; display: grid; gap: 12px; }
+.vpanel { display: grid; gap: 14px; padding: 16px; border: 2px dashed var(--line); border-radius: 10px; }
+.vpanel[hidden] { display: none; }
+.vhelp { font-size: .95rem; color: var(--muted); max-width: 62ch; }
+.vprev { display: grid; gap: 8px; }
+.vprev video { width: 100%; max-width: 360px; max-height: 440px; border-radius: 8px; background: #000; }
+.vinfo { font-size: .9rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.sr { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.err { color: var(--danger); font-weight: 700; min-height: 1.5em; }
+.status { color: var(--muted); min-height: 1.5em; }
+.msgs { display: grid; gap: 6px; }
+.msgs .err, .msgs .status, .vpanel .err { min-height: 0; }
+.msgs:not(:has(> :not(:empty):not([hidden]))), .nav:not(:has(> :not([hidden]))) { margin-block: -9px; }
+
+.thanks { display: grid; gap: 12px; }
 .thanks .verse { font-style: italic; }
 .thanks .links { display: grid; gap: 12px; border-top: 2px solid var(--line); padding-top: 16px; }
 .thanks .lk { font-weight: 700; }
 .thanks a { color: var(--focus); overflow-wrap: anywhere; }
-pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overflow-x: auto; font-size: .85rem; max-height: 320px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
@@ -140,6 +161,8 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
 
   <div class="frame" id="frame">
     <div id="yt"></div>
+    <div class="shield" id="shield"></div>
+    <div class="wm" id="wm" aria-hidden="true" hidden></div>
     <div class="demo" id="demo" hidden>
       <strong>Prévia sem o vídeo do YouTube</strong>
       <div class="clock" id="clock">0:00</div>
@@ -155,6 +178,15 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
   </div>
 
   <form class="box" id="intro" novalidate>
+    <div class="timer" id="timer" hidden>
+      <span class="tlab" id="tlab">Tempo restante para participar</span>
+      <strong class="tval" id="tval"></strong>
+    </div>
+    <div id="closed" hidden>
+      <h2>Pesquisa encerrada</h2>
+      <p class="status">O prazo para participar terminou. Esta página não recebe mais respostas. Obrigado pelo interesse!</p>
+    </div>
+    <div class="ifields" id="ifields">
     <div class="resume" id="resume" hidden>
       <p id="resumeText"></p>
       <div class="actions">
@@ -199,40 +231,72 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
 
     <div class="err" id="introErr" role="alert"></div>
     <div class="actions"><button class="btn" type="submit" id="start">Começar</button></div>
+    </div>
   </form>
 
   <section class="box" id="watching" hidden>
     <p class="status">Assista até o vídeo parar.</p>
+    <button class="btn ghost" type="button" id="pp" style="justify-self:start">Pausar</button>
   </section>
 
   <form class="box" id="ask" hidden novalidate>
     <fieldset>
       <legend id="askTitle"></legend>
+      <p class="qhelp">Selecione a(s) tradução(ões) que melhor expressam o sentido do trecho. Evite marcar todas as opções</p>
       <div class="grid" id="options"></div>
-      <label class="opt none" for="none">
-        <input type="checkbox" id="none" name="none" value="none">
-        <span class="num" aria-hidden="true">0</span>
-        <span class="name">Nenhuma ficou boa</span>
+      <p class="absnote" id="absNote" hidden>Opções indisponíveis: São traduções idênticas ou bem semelhantes à tradução base gravada pelo CATLIBRAS.</p>
+
+      <button type="button" class="opt sug" id="sugBtn" data-on="false" aria-expanded="false" aria-controls="vpanel" disabled>
+        <span class="name">Enviar sugestão 🎥<span class="sub" id="sugSub" hidden></span></span>
         <span class="tick" aria-hidden="true">✓</span>
-      </label>
+      </button>
+
+      <div class="vpanel" id="vpanel" hidden>
+        <p class="vhelp">Grave a sua tradução ou escolha um vídeo da galeria. Recomendamos vídeos de 4 a 15 segundos. O máximo é 20 segundos e 20 MB.</p>
+        <div class="actions">
+          <button type="button" class="btn ghost" id="vCamBtn">Gravar com a câmera</button>
+          <button type="button" class="btn ghost" id="vGalBtn">Escolher da galeria</button>
+        </div>
+        <input type="file" id="vCam" class="sr" accept="video/*" capture="user" tabindex="-1" aria-hidden="true">
+        <input type="file" id="vGal" class="sr" accept="video/*" tabindex="-1" aria-hidden="true">
+        <p class="vhelp" id="vsent" hidden>O vídeo deste bloco já foi enviado. Para trocar, grave ou escolha outro.</p>
+        <div class="vprev" id="vprev" hidden>
+          <video id="vplayer" controls playsinline preload="metadata"></video>
+          <p class="vinfo" id="vinfo"></p>
+        </div>
+        <div class="actions"><button type="button" class="btn ghost" id="vRemove" hidden>Remover vídeo</button></div>
+        <label class="check" for="vconsent" id="vconsentWrap">
+          <input type="checkbox" id="vconsent">
+          <span>Autorizo o envio do meu vídeo para a equipe da pesquisa. O uso da minha imagem na internet dependerá de minha autorização prévia.</span>
+        </label>
+        <div class="err" id="verr" role="alert"></div>
+      </div>
     </fieldset>
-    <div class="err" id="err" role="alert"></div>
+    <div class="msgs">
+      <div class="err" id="err" role="alert"></div>
+      <div class="status" id="sendMsg" role="status"></div>
+      <button class="btn ghost" type="button" id="skip" hidden style="justify-self:start">Continuar sem o vídeo</button>
+    </div>
+    <div class="nav">
+      <button class="btn ghost" type="button" id="prev">← Bloco anterior</button>
+      <select id="goto" aria-label="Ir para um bloco já respondido"></select>
+    </div>
     <div class="actions">
       <button class="btn ghost" type="button" id="replay">Rever trecho</button>
       <button class="btn" type="submit" id="confirm">Confirmar e continuar</button>
     </div>
   </form>
 
+  <section class="box" id="review" hidden>
+    <h2>Você respondeu todos os blocos</h2>
+    <p>Se quiser, volte a um bloco para rever o trecho e remarcar a resposta. Quando estiver pronto, finalize a pesquisa.</p>
+    <div class="nav"><select id="gotoR" aria-label="Rever um bloco"></select></div>
+    <div class="status" id="revMsg" role="status"></div>
+    <div class="actions"><button class="btn" type="button" id="finish">Finalizar pesquisa</button></div>
+  </section>
+
   <section class="box" id="done" hidden>
     <h2>Obrigado!</h2>
-    <p id="sendStatus" class="status"></p>
-    <div class="actions"><button class="btn" type="button" id="retry" hidden>Tentar enviar de novo</button></div>
-    <div class="wrap"><table><thead><tr><th>Nº</th><th>Traduções marcadas como boas</th></tr></thead><tbody id="summary"></tbody></table></div>
-    <div class="actions">
-      <button class="btn ghost" type="button" id="copyCsv">Copiar respostas (CSV)</button>
-      <button class="btn ghost" type="button" id="again">Refazer o teste</button>
-    </div>
-    <pre id="csv" hidden></pre>
     <div class="thanks">
       <p><strong>💙 A Equipe CATLIBRAS agradece sua participação!</strong></p>
       <p>Fique atento(a) ao nosso canal, pois em breve divulgaremos os resultados da pesquisa!</p>
@@ -249,11 +313,14 @@ pre { margin: 0; padding: 12px; background: var(--bg); border-radius: 8px; overf
 <script>
 /* ===== CONFIGURAÇÃO ===== */
 const CONFIG = {
-  videoId: "CKiZ_DksZS4",
-  endpoint: "https://script.google.com/macros/s/AKfycbw5adPRI4jf5S7Ex5oJKjyHpB84wEI-nFVYB7VJkbdsu5J1jVW0SOv7OiApO7cjjznfgg/exec",             // URL do Google Apps Script (vazio = só mostra o resultado na tela)
+  videoInvertido: "4SZskD_ZiKC",   // código do vídeo do YouTube escrito de trás para frente (só para não aparecer de cara)
+  marcaDagua: true,         // mostra o nome do participante, pequeno, no canto do vídeo (desencoraja gravação de tela)
+  endpoint: "https://script.google.com/macros/s/AKfycbw5adPRI4jf5S7Ex5oJKjyHpB84wEI-nFVYB7VJkbdsu5J1jVW0SOv7OiApO7cjjznfgg/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
   codigo: "OE3",            // código de acesso
   consentimento: "Concordo voluntariamente em participar desta pesquisa. Autorizo o uso das minhas respostas para fins de estudo, ciente de que meu nome e WhatsApp serão acessados apenas pela equipe. O uso da minha imagem na internet dependerá de minha autorização prévia.",
   traducoes: ["A", "B", "C", "D", "E", "F"],
+  videoMaxMB: 20,           // tamanho máximo do vídeo de sugestão
+  videoMaxSeg: 20,          // duração máxima do vídeo de sugestão (segundos)
   /* t = segundo do vídeo em que o bloco termina (o vídeo para ali).
      ausentes = traduções que não aparecem naquele bloco (ficam esmaecidas). */
   blocos: [
@@ -267,9 +334,13 @@ const UFS = [["AC","Acre"],["AL","Alagoas"],["AP","Amapá"],["AM","Amazonas"],["
 
 const $ = (id) => document.getElementById(id);
 const Q = CONFIG.blocos, L = CONFIG.traducoes, N = Q.length;
-const KEY = "oe3-pesquisa-v1";
+const KEY = "oe3-pesquisa-v2";
+const MAXB = CONFIG.videoMaxMB * 1024 * 1024;
+const VIDEO_ID = CONFIG.videoInvertido.split("").reverse().join("");
+let lastErr = "", isClosed = false, offset = 0, encerraEm = null, demoPrazo = false;
 let stage = "intro", idx = 0, answers = [], adapter = null, yt = null;
-let sid = "", profile = null, outbox = [], shownAt = 0, replays = 0, flushing = false;
+let sid = "", profile = null, outbox = [], shownAt = 0, replays = 0, flushP = null;
+let vd = null, busy = false, videoOk = false, guardUntil = 0;
 
 /* ===== Salvamento no navegador (para continuar de onde parou) ===== */
 function loadSaved() {
@@ -277,13 +348,22 @@ function loadSaved() {
   return null;
 }
 function save() {
-  try { localStorage.setItem(KEY, JSON.stringify({ n: N, sid: sid, profile: profile, answers: answers, outbox: outbox })); } catch (e) {}
+  try { localStorage.setItem(KEY, JSON.stringify({ n: N, sid: sid, profile: profile, answers: answers, outbox: outbox, videoOk: videoOk })); } catch (e) {}
 }
 function clearSaved() { try { localStorage.removeItem(KEY); } catch (e) {} }
 
-/* ===== Montagem da tela ===== */
+/* ===== Utilidades ===== */
 function mmss(s) { s = Math.max(0, Math.floor(s)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); }
+function mb(n) { return (n / 1048576).toFixed(1).replace(".", ","); }
+function setMsg(el, text, bad) { el.textContent = text; el.className = bad ? "err" : "status"; }
+function scrollTop() { window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
+function setBusy(b) {
+  busy = b;
+  ["confirm", "prev", "replay", "goto", "gotoR", "vCamBtn", "vGalBtn", "vRemove", "finish", "skip"].forEach(function (id) { $(id).disabled = b; });
+  updateSug();
+}
 
+/* ===== Montagem da tela ===== */
 function buildStatic() {
   $("pstate").innerHTML = '<option value="">Selecione</option>' + UFS.map(function (u) { return '<option value="' + u[0] + '">' + u[1] + '</option>'; }).join("");
   $("consentText").textContent = CONFIG.consentimento;
@@ -305,9 +385,19 @@ function renderProgress() {
   for (let i = 0; i < segs.length; i++) {
     segs[i].className = i < answers.length ? "done" : (active && i === idx ? "cur" : "");
   }
-  const shown = stage === "done" ? N : (active ? idx + 1 : answers.length);
+  const shown = (stage === "review" || stage === "done") ? N : (active ? idx + 1 : answers.length);
   $("count").textContent = shown + " / " + N;
   $("segs").setAttribute("aria-valuenow", answers.length);
+}
+
+function updateGoto() {
+  let h = '<option value="">Ir para o bloco…</option>';
+  for (let i = 0; i < answers.length; i++) {
+    h += '<option value="' + i + '">Bloco ' + (i + 1) + (stage === "asking" && i === idx ? " (atual)" : "") + '</option>';
+  }
+  $("goto").innerHTML = h;
+  $("gotoR").innerHTML = h.replace("Ir para o bloco…", "Rever o bloco…");
+  $("goto").hidden = answers.length === 0;
 }
 
 function show(which) {
@@ -315,6 +405,7 @@ function show(which) {
   $("intro").hidden = which !== "intro";
   $("watching").hidden = which !== "watching";
   $("ask").hidden = which !== "asking";
+  $("review").hidden = which !== "review";
   $("done").hidden = which !== "done";
   renderProgress();
 }
@@ -334,6 +425,7 @@ function useYouTube() {
 function useDemo() {
   if (adapter) return;
   $("yt").hidden = true;
+  $("shield").hidden = true;
   $("demo").hidden = false;
   const total = Q[N - 1].t + 5;
   let t = 0, on = false;
@@ -364,8 +456,9 @@ function loadYouTube() {
   window.onYouTubeIframeAPIReady = function () {
     if (adapter) return;
     yt = new YT.Player("yt", {
-      videoId: CONFIG.videoId,
-      playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
+      videoId: VIDEO_ID,
+      host: "https://www.youtube-nocookie.com",
+      playerVars: { rel: 0, playsinline: 1, modestbranding: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, cc_load_policy: 0 },
       events: {
         onReady: useYouTube,
         onStateChange: function (e) {
@@ -385,73 +478,131 @@ function loadYouTube() {
   setTimeout(function () { if (!adapter && !(window.YT && window.YT.Player)) useDemo(); }, 3500);
 }
 
-/* ===== Envio das respostas (uma a uma) ===== */
-async function flush() {
-  if (!CONFIG.endpoint || flushing) return;
-  flushing = true;
-  try {
-    while (outbox.length) {
-      await fetch(CONFIG.endpoint, {
-        method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" },
-        body: JSON.stringify(outbox[0])
-      });
-      outbox.shift();
-      save();
-    }
-  } catch (e) {}
-  flushing = false;
-  if (stage === "done") sendMessage();
+/* ===== Comunicação com a planilha ===== */
+function post(payload) {
+  return fetch(CONFIG.endpoint, {
+    method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload)
+  }).then(function (r) { return r.json(); }).then(function (j) { if (!j.ok) throw new Error(j.erro || "erro"); return j; });
 }
 
-function sendMessage() {
-  const pending = outbox.length > 0;
-  $("retry").hidden = !(CONFIG.endpoint && pending);
-  if (!CONFIG.endpoint) $("sendStatus").textContent = "Respostas registradas nesta tela. O envio para a planilha ainda não está configurado.";
-  else if (pending) $("sendStatus").textContent = "Algumas respostas ainda não foram enviadas. Confira a internet e aperte o botão abaixo.";
-  else { $("sendStatus").textContent = "Respostas enviadas. Pode fechar esta página."; clearSaved(); }
+function postXHR(payload, onProg) {
+  return new Promise(function (resolve, reject) {
+    const x = new XMLHttpRequest();
+    x.open("POST", CONFIG.endpoint);
+    x.setRequestHeader("Content-Type", "text/plain;charset=utf-8");
+    x.timeout = 300000;
+    x.upload.onprogress = function (e) { if (e.lengthComputable) onProg(e.loaded / e.total); };
+    x.onload = function () {
+      try { const j = JSON.parse(x.responseText); j.ok ? resolve(j) : reject(new Error(j.erro || "erro")); } catch (err) { reject(err); }
+    };
+    x.onerror = function () { reject(new Error("rede")); };
+    x.ontimeout = function () { reject(new Error("tempo")); };
+    x.send(JSON.stringify(payload));
+  });
+}
+
+function fileToB64(file) {
+  return new Promise(function (resolve, reject) {
+    const r = new FileReader();
+    r.onload = function () { resolve(String(r.result).split(",")[1] || ""); };
+    r.onerror = function () { reject(r.error); };
+    r.readAsDataURL(file);
+  });
+}
+
+async function sendVideo(file, j, onProg) {
+  const dados = await fileToB64(file);
+  const nome = (file.name || "").split(".");
+  const ext = (nome.length > 1 ? nome.pop() : (file.type.split("/")[1] || "mp4")).toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "mp4";
+  return postXHR({
+    msg: "video", codigo: CONFIG.codigo, sessao: sid, bloco: j + 1, nome: profile.nome,
+    ext: ext, mime: file.type || "video/mp4", dados: dados
+  }, onProg);
+}
+
+function flush() {
+  if (!CONFIG.endpoint) return Promise.resolve();
+  if (flushP) return flushP;
+  flushP = (async function () {
+    try {
+      while (outbox.length) { await post(outbox[0]); outbox.shift(); save(); }
+    } catch (e) { lastErr = e && e.message || "erro"; }
+    flushP = null;
+  })();
+  return flushP;
 }
 
 /* ===== Fluxo do teste ===== */
-function startWatching() {
+function begin(from) {
+  idx = from;
+  adapter.seek(from > 0 ? Q[from - 1].t : 0);
+  guardUntil = Date.now() + 700;
+  adapter.play();
   show("watching");
+  scrollTop();
 }
 
-function askQuestion() {
-  const q = Q[idx];
-  if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
-  $("askTitle").textContent = "Bloco " + (idx + 1) + ": quais traduções ficaram boas?";
+function openAsk(j, prefill) {
+  idx = j;
+  const q = Q[j], a = prefill ? answers[j] : null;
+  dropVideo();
   L.forEach(function (l) {
     const off = (q.ausentes || []).indexOf(l) >= 0;
     const lab = $("lab" + l), inp = $("o" + l);
     lab.classList.toggle("off", off);
     inp.disabled = off;
-    inp.checked = false;
+    inp.checked = !off && !!a && a.opcoes[l] === 1;
     lab.querySelector(".sub").hidden = !off;
   });
-  $("none").checked = false;
-  $("err").textContent = "";
+  $("absNote").hidden = !(q.ausentes || []).length;
+  $("askTitle").textContent = "Bloco " + (j + 1) + ": quais traduções ficaram boas?";
+  $("confirm").textContent = prefill ? "Salvar e continuar" : "Confirmar e continuar";
+  if (a && a.video) vd = { sent: true };
+  $("vpanel").hidden = true;
+  $("sugBtn").setAttribute("aria-expanded", "false");
+  updateSug();
+  setMsg($("err"), "", true);
+  setMsg($("verr"), "", true);
+  setMsg($("sendMsg"), "", false);
+  $("skip").hidden = true;
   replays = 0;
   shownAt = Date.now();
+  $("prev").hidden = j === 0;
   show("asking");
-  $("ask").scrollIntoView({ block: "nearest", behavior: "smooth" });
+  updateGoto();
+}
+
+function goTo(j) {
+  if (busy || !(j >= 0 && j < answers.length)) return;
+  adapter.seek(j === 0 ? 0 : Q[j - 1].t);
+  adapter.pause();
+  guardUntil = Date.now() + 700;
+  openAsk(j, true);
+  scrollTop();
+}
+
+function enterReview() {
+  adapter.pause();
+  show("review");
+  updateGoto();
+  setMsg($("revMsg"), "", false);
+  scrollTop();
 }
 
 function tick() {
-  if (!adapter || stage === "intro" || stage === "done") return;
+  if (adapter && stage === "watching") $("pp").textContent = adapter.playing() ? "Pausar" : "Continuar";
+  if (!adapter || Date.now() < guardUntil || (stage !== "watching" && stage !== "asking")) return;
   const q = Q[idx];
   if (adapter.playing() && adapter.time() >= q.t) {
     adapter.pause();
-    if (stage !== "asking") askQuestion();
-    else if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
+    if (stage === "watching") {
+      if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
+      openAsk(idx, false);
+      $("ask").scrollIntoView({ block: "nearest", behavior: "smooth" });
+    } else if (adapter.time() > q.t + 0.3) adapter.seek(q.t);
   }
 }
 setInterval(tick, 150);
-
-function begin(fromIdx) {
-  if (fromIdx > 0) { idx = fromIdx; adapter.seek(Q[fromIdx - 1].t); } else { idx = 0; adapter.seek(0); }
-  adapter.play();
-  startWatching();
-}
 
 /* ----- Formulário de entrada ----- */
 function digits(el) { el.addEventListener("input", function () { el.value = el.value.replace(/\D/g, ""); }); }
@@ -472,6 +623,7 @@ function validateIntro() {
 
 $("intro").addEventListener("submit", function (e) {
   e.preventDefault();
+  if (isClosed) return;
   const bad = validateIntro();
   if (bad) { $("introErr").textContent = bad.msg; bad.el.focus(); return; }
   if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e aperte Começar de novo."; return; }
@@ -483,117 +635,282 @@ $("intro").addEventListener("submit", function (e) {
     whatsapp: $("pddd").value + $("pnum").value
   };
   sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-  answers = []; outbox = [];
+  answers = []; outbox = []; videoOk = false;
+  setWm();
   save();
+  updateGoto();
   begin(0);
 });
 
 /* ----- Continuar de onde parou ----- */
 function offerResume(saved) {
-  $("resumeText").textContent = "Você já respondeu " + saved.answers.length + " de " + N + ". Quer continuar de onde parou?";
+  $("resumeText").textContent = saved.answers.length >= N
+    ? "Você já respondeu todos os blocos, mas ainda não finalizou a pesquisa."
+    : "Você já respondeu " + saved.answers.length + " de " + N + " blocos. Quer continuar de onde parou?";
   $("resume").hidden = false;
   $("resumeGo").onclick = function () {
     if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e tente de novo."; return; }
-    sid = saved.sid; profile = saved.profile; answers = saved.answers; outbox = saved.outbox || [];
+    sid = saved.sid; profile = saved.profile; answers = saved.answers; outbox = saved.outbox || []; videoOk = !!saved.videoOk;
+    setWm();
     $("introErr").textContent = "";
     flush();
-    begin(answers.length);
+    if (answers.length >= N) { adapter.seek(Q[N - 1].t); enterReview(); }
+    else { updateGoto(); begin(answers.length); }
   };
   $("resumeNew").onclick = function () { clearSaved(); $("resume").hidden = true; };
 }
 
-/* ----- Resposta de cada bloco ----- */
-$("none").onchange = function () {
-  if (this.checked) document.querySelectorAll('input[name="opt"]').forEach(function (i) { i.checked = false; });
-};
-$("options").addEventListener("change", function (e) {
-  if (e.target.checked) $("none").checked = false;
-});
+/* ----- Sugestão em vídeo ----- */
+function dropVideo() {
+  if (vd && vd.url) URL.revokeObjectURL(vd.url);
+  vd = null;
+  const p = $("vplayer");
+  p.removeAttribute("src");
+  try { p.load(); } catch (e) {}
+}
 
-$("replay").onclick = function () {
-  replays++;
-  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
-  adapter.play();
-};
+function infoText(v) {
+  let t = (v.dur ? Math.round(v.dur) + " s · " : "") + mb(v.size) + " MB";
+  if (!v.dur) t += ". Não foi possível conferir a duração.";
+  else if (v.dur < 4 || v.dur > 15) t += ". Recomendamos vídeos de 4 a 15 segundos.";
+  return t;
+}
 
-$("ask").addEventListener("submit", function (e) {
-  e.preventDefault();
-  const checked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return i.value; });
-  const none = $("none").checked;
-  if (!checked.length && !none) {
-    $("err").textContent = "Marque pelo menos uma opção, ou “Nenhuma ficou boa”.";
+function anyChecked() { return !!document.querySelector('input[name="opt"]:checked'); }
+
+function updateSug() {
+  const ok = anyChecked();
+  $("sugBtn").disabled = busy || !ok;
+  if (!ok) { $("vpanel").hidden = true; $("sugBtn").setAttribute("aria-expanded", "false"); }
+  renderVideo();
+}
+
+function renderVideo() {
+  const ok = anyChecked();
+  let t = "";
+  if (!ok) t = "Marque uma tradução para liberar este botão";
+  else if (vd) t = vd.sent ? "Vídeo já enviado" : "Vídeo pronto para enviar";
+  $("sugBtn").dataset.on = vd ? "true" : "false";
+  $("sugSub").textContent = t;
+  $("sugSub").hidden = !t;
+  $("vprev").hidden = !(vd && vd.url);
+  $("vsent").hidden = !(vd && vd.sent);
+  $("vRemove").hidden = !vd;
+  $("vconsentWrap").hidden = videoOk;
+  if (vd && vd.url) {
+    if ($("vplayer").getAttribute("src") !== vd.url) $("vplayer").src = vd.url;
+    $("vinfo").textContent = infoText(vd);
+  }
+}
+
+function readDuration(url) {
+  return new Promise(function (resolve) {
+    const v = document.createElement("video");
+    let done = false;
+    function end(d) { if (done) return; done = true; resolve(d); }
+    v.preload = "metadata";
+    v.onloadedmetadata = function () { end(isFinite(v.duration) ? v.duration : 0); };
+    v.onerror = function () { end(0); };
+    setTimeout(function () { end(0); }, 5000);
+    v.src = url;
+  });
+}
+
+async function pickVideo(file) {
+  setMsg($("verr"), "", true);
+  if (!file) return;
+  if (file.size > MAXB) {
+    setMsg($("verr"), "O vídeo tem " + mb(file.size) + " MB e o limite é " + CONFIG.videoMaxMB + " MB. Grave de novo, mais curto ou em qualidade menor.", true);
     return;
   }
-  const q = Q[idx], opcoes = {};
-  L.forEach(function (l) {
-    opcoes[l] = (q.ausentes || []).indexOf(l) >= 0 ? null : (checked.indexOf(l) >= 0 ? 1 : 0);
-  });
-  const rec = { bloco: idx + 1, t: q.t, opcoes: opcoes, nenhuma: none ? 1 : 0, revisoes: replays, segundos: Math.round((Date.now() - shownAt) / 1000) };
-  answers.push(rec);
-  outbox.push({
-    codigo: CONFIG.codigo, sessao: sid, enviadoEm: new Date().toISOString(),
-    nome: profile.nome, tipo: profile.tipo, estado: profile.estado, whatsapp: profile.whatsapp,
-    bloco: rec.bloco, segundo: rec.t, opcoes: rec.opcoes, nenhuma: rec.nenhuma, revisoes: rec.revisoes, segundos: rec.segundos
-  });
-  save();
-  flush();
-  idx++;
-  if (idx >= N) return finish();
-  startWatching();
+  const url = URL.createObjectURL(file);
+  const dur = await readDuration(url);
+  if (dur && dur > CONFIG.videoMaxSeg + 0.5) {
+    URL.revokeObjectURL(url);
+    setMsg($("verr"), "O vídeo tem " + Math.round(dur) + " segundos e o máximo é " + CONFIG.videoMaxSeg + ". Grave um vídeo mais curto, de 4 a 15 segundos.", true);
+    return;
+  }
+  dropVideo();
+  vd = { file: file, url: url, dur: dur, size: file.size };
+  renderVideo();
+}
+
+$("sugBtn").onclick = function () {
+  const open = $("vpanel").hidden;
+  $("vpanel").hidden = !open;
+  this.setAttribute("aria-expanded", open ? "true" : "false");
+};
+$("options").addEventListener("change", updateSug);
+$("vCamBtn").onclick = function () { $("vCam").click(); };
+$("vGalBtn").onclick = function () { $("vGal").click(); };
+["vCam", "vGal"].forEach(function (id) {
+  $(id).addEventListener("change", function () { const f = this.files && this.files[0]; this.value = ""; pickVideo(f); });
+});
+$("vRemove").onclick = function () { dropVideo(); renderVideo(); setMsg($("verr"), "", true); };
+
+/* ----- Navegação e resposta de cada bloco ----- */
+$("prev").onclick = function () { goTo(idx - 1); };
+$("goto").onchange = function () { const v = this.value; if (v !== "") goTo(Number(v)); };
+$("gotoR").onchange = function () { const v = this.value; if (v !== "") goTo(Number(v)); };
+
+$("replay").onclick = function () {
+  if (busy) return;
+  replays++;
+  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
+  guardUntil = Date.now() + 700;
   adapter.play();
+  scrollTop();
+};
+
+$("skip").onclick = function () { dropVideo(); renderVideo(); $("confirm").click(); };
+
+$("ask").addEventListener("submit", async function (e) {
+  e.preventDefault();
+  if (busy) return;
+  const j = idx, q = Q[j];
+  const checked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return i.value; });
+  setMsg($("err"), "", true);
+  setMsg($("verr"), "", true);
+  if (!checked.length) {
+    setMsg($("err"), "Marque pelo menos uma tradução.", true);
+    return;
+  }
+  const novo = !!(vd && vd.file);
+  if (novo && !videoOk && !$("vconsent").checked) {
+    $("vpanel").hidden = false;
+    setMsg($("verr"), "Marque a autorização para enviar o vídeo.", true);
+    return;
+  }
+  const opcoes = {};
+  L.forEach(function (l) { opcoes[l] = (q.ausentes || []).indexOf(l) >= 0 ? null : (checked.indexOf(l) >= 0 ? 1 : 0); });
+  const rec = { bloco: j + 1, t: q.t, opcoes: opcoes, video: !!vd, revisoes: replays, segundos: Math.round((Date.now() - shownAt) / 1000) };
+  const antes = !!(answers[j] && answers[j].video);
+  const payload = {
+    msg: "resp", codigo: CONFIG.codigo, sessao: sid, enviadoEm: new Date().toISOString(),
+    nome: profile.nome, tipo: profile.tipo, estado: profile.estado, whatsapp: profile.whatsapp,
+    bloco: rec.bloco, segundo: rec.t, opcoes: rec.opcoes, revisoes: rec.revisoes, segundos: rec.segundos,
+    semVideo: antes && !vd
+  };
+  if (novo) {
+    setBusy(true);
+    try {
+      if (CONFIG.endpoint) {
+        setMsg($("sendMsg"), "Enviando…", false);
+        await flush();
+        if (outbox.length) throw new Error("rede");
+        await post(payload);
+        await sendVideo(vd.file, j, function (p) { setMsg($("sendMsg"), "Enviando vídeo… " + Math.round(p * 100) + "%", false); });
+      }
+    } catch (err) {
+      setBusy(false);
+      setMsg($("sendMsg"), "", false);
+      setMsg($("verr"), err && err.message === "encerrada"
+        ? "A pesquisa foi encerrada e não recebe mais respostas."
+        : "Não foi possível enviar o vídeo. Confira a internet e toque em Confirmar de novo.", true);
+      $("vpanel").hidden = false;
+      $("skip").hidden = false;
+      return;
+    }
+    setBusy(false);
+    setMsg($("sendMsg"), "", false);
+    videoOk = true;
+    rec.video = true;
+  } else {
+    outbox.push(payload);
+  }
+  if (j === answers.length) answers.push(rec); else answers[j] = rec;
+  save();
+  if (!novo) flush();
+  if (answers.length >= N) enterReview();
+  else begin(answers.length);
 });
 
-/* ----- Final ----- */
-function csvCell(v) { return '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"'; }
-function csvText() {
-  const p = profile || {};
-  const rows = [["nome", "tipo", "estado", "whatsapp", "bloco", "segundo"].concat(L, ["nenhuma", "revisoes", "segundos"])];
-  answers.forEach(function (a) {
-    rows.push([p.nome, p.tipo, p.estado, p.whatsapp, a.bloco, a.t].concat(L.map(function (l) { return a.opcoes[l]; }), [a.nenhuma, a.revisoes, a.segundos]));
-  });
-  return rows.map(function (r) { return r.map(csvCell).join(","); }).join("\n");
-}
-
-function finish() {
+/* ----- Finalizar ----- */
+$("finish").onclick = async function () {
+  if (busy) return;
+  if (CONFIG.endpoint) {
+    setBusy(true);
+    setMsg($("revMsg"), "Enviando respostas…", false);
+    await flush();
+    if (outbox.length) await flush();
+    setBusy(false);
+    if (outbox.length) {
+      setMsg($("revMsg"), lastErr === "encerrada"
+        ? "A pesquisa foi encerrada e não recebe mais respostas."
+        : "Algumas respostas não foram enviadas. Confira a internet e toque em Finalizar pesquisa de novo.", true);
+      return;
+    }
+  }
+  clearSaved();
   adapter.pause();
   show("done");
-  $("summary").innerHTML = answers.map(function (a) {
-    const boas = L.filter(function (l) { return a.opcoes[l] === 1; });
-    const txt = a.nenhuma ? "Nenhuma" : boas.join(", ");
-    return "<tr><td>" + a.bloco + "</td><td>" + txt + "</td></tr>";
-  }).join("");
-  $("csv").textContent = csvText();
-  sendMessage();
-  if (CONFIG.endpoint) { $("sendStatus").textContent = "Enviando respostas…"; flush(); }
-  else clearSaved();
+  scrollTop();
+};
+
+/* ===== Pausar/continuar, marca d'água e proteção do vídeo ===== */
+$("pp").onclick = function () { if (!adapter) return; if (adapter.playing()) adapter.pause(); else adapter.play(); };
+
+function setWm() {
+  $("wm").textContent = profile ? profile.nome : "";
+  $("wm").hidden = !(CONFIG.marcaDagua && profile);
 }
 
-$("retry").onclick = function () { $("sendStatus").textContent = "Enviando respostas…"; flush(); };
+["shield", "wm", "frame"].forEach(function (id) {
+  $(id).addEventListener("contextmenu", function (e) { e.preventDefault(); });
+});
 
-$("copyCsv").onclick = function () {
-  $("csv").hidden = false;
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(csvText()).then(function () { $("copyCsv").textContent = "Copiado"; }, function () {});
+/* ===== Prazo da pesquisa ===== */
+function fmtRest(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  return Math.floor(s / 86400) + " d " + Math.floor(s % 86400 / 3600) + " h " + Math.floor(s % 3600 / 60) + " min " + (s % 60) + " s";
+}
+
+function setClosed() {
+  isClosed = true;
+  if (stage !== "intro") return;
+  $("timer").hidden = true;
+  $("ifields").hidden = true;
+  $("closed").hidden = false;
+}
+
+function tickTimer() {
+  if (encerraEm === null || isClosed) return;
+  const rest = encerraEm - (Date.now() + offset);
+  if (rest <= 0) { setClosed(); return; }
+  if (stage === "intro") {
+    $("timer").hidden = false;
+    $("tlab").textContent = "Tempo restante para participar" + (demoPrazo ? " (exemplo da prévia)" : "");
+    $("tval").textContent = fmtRest(rest);
   }
-};
+}
+setInterval(tickTimer, 1000);
 
-$("again").onclick = function () {
-  idx = 0; answers = []; outbox = [];
-  $("csv").hidden = true; $("copyCsv").textContent = "Copiar respostas (CSV)";
-  $("pcode").value = ""; $("pok").checked = false; $("introErr").textContent = "";
-  adapter.pause(); adapter.seek(0);
-  show("intro");
-};
+async function loadStatus() {
+  try {
+    if (!CONFIG.endpoint) {
+      demoPrazo = true;
+      encerraEm = Date.now() + 7 * 86400000;
+    } else {
+      const r = await fetch(CONFIG.endpoint + "?acao=status&t=" + Date.now());
+      const j = await r.json();
+      if (!j || !j.ok) return;
+      offset = (j.agora || Date.now()) - Date.now();
+      if (j.fechada) { setClosed(); return; }
+      encerraEm = j.encerraEm || null;
+    }
+  } catch (e) { return; }
+  tickTimer();
+}
 
 /* ===== Início ===== */
 buildStatic();
+loadStatus();
 renderProgress();
+updateGoto();
 loadYouTube();
 (function () {
   const saved = loadSaved();
-  if (!saved) return;
-  if (saved.answers.length > 0 && saved.answers.length < N) offerResume(saved);
-  else if ((saved.outbox || []).length && CONFIG.endpoint) { outbox = saved.outbox; flush().then(function () { if (!outbox.length) clearSaved(); }); }
+  if (saved && saved.answers.length > 0) offerResume(saved);
 })();
 </script>
 
