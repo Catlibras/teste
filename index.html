@@ -70,12 +70,6 @@ header { display: grid; gap: 6px; }
 .bar { position: relative; width: min(420px, 80vw); height: 8px; border-radius: 4px; background: #2D3C48; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #EAF0F4; border-radius: 4px; width: 0; }
 .bar b { position: absolute; top: -4px; width: 3px; height: 16px; background: #FB923C; }
-.shield { position: absolute; inset: 0; background: transparent; }
-.wm { position: absolute; right: 8px; bottom: 8px; max-width: 60%; font-size: .72rem; line-height: 1.2; color: #fff; opacity: .45; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.timer { display: grid; gap: 2px; padding: 12px 16px; border: 2px solid var(--ink); border-radius: 10px; }
-.timer .tlab { font-size: .9rem; color: var(--muted); font-weight: 700; }
-.timer .tval { font-family: var(--font-display); font-size: 1.5rem; font-variant-numeric: tabular-nums; }
-.ifields { display: grid; gap: 18px; }
 
 .prog { display: flex; align-items: center; gap: 12px; }
 .segs { flex: 1; min-width: 0; display: flex; }
@@ -161,8 +155,6 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 
   <div class="frame" id="frame">
     <div id="yt"></div>
-    <div class="shield" id="shield"></div>
-    <div class="wm" id="wm" aria-hidden="true" hidden></div>
     <div class="demo" id="demo" hidden>
       <strong>Prévia sem o vídeo do YouTube</strong>
       <div class="clock" id="clock">0:00</div>
@@ -178,15 +170,6 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
   </div>
 
   <form class="box" id="intro" novalidate>
-    <div class="timer" id="timer" hidden>
-      <span class="tlab" id="tlab">Tempo restante para participar</span>
-      <strong class="tval" id="tval"></strong>
-    </div>
-    <div id="closed" hidden>
-      <h2>Pesquisa encerrada</h2>
-      <p class="status">O prazo para participar terminou. Esta página não recebe mais respostas. Obrigado pelo interesse!</p>
-    </div>
-    <div class="ifields" id="ifields">
     <div class="resume" id="resume" hidden>
       <p id="resumeText"></p>
       <div class="actions">
@@ -231,12 +214,10 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 
     <div class="err" id="introErr" role="alert"></div>
     <div class="actions"><button class="btn" type="submit" id="start">Começar</button></div>
-    </div>
   </form>
 
   <section class="box" id="watching" hidden>
     <p class="status">Assista até o vídeo parar.</p>
-    <button class="btn ghost" type="button" id="pp" style="justify-self:start">Pausar</button>
   </section>
 
   <form class="box" id="ask" hidden novalidate>
@@ -246,13 +227,13 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
       <div class="grid" id="options"></div>
       <p class="absnote" id="absNote" hidden>Opções indisponíveis: São traduções idênticas ou bem semelhantes à tradução base gravada pelo CATLIBRAS.</p>
 
-      <button type="button" class="opt sug" id="sugBtn" data-on="false" aria-expanded="false" aria-controls="vpanel" disabled>
+      <button type="button" class="opt sug" id="sugBtn" data-on="false" aria-expanded="false" aria-controls="vpanel">
         <span class="name">Enviar sugestão 🎥<span class="sub" id="sugSub" hidden></span></span>
         <span class="tick" aria-hidden="true">✓</span>
       </button>
 
       <div class="vpanel" id="vpanel" hidden>
-        <p class="vhelp">Grave a sua tradução ou escolha um vídeo da galeria. Recomendamos vídeos de 4 a 15 segundos. O máximo é 20 segundos e 20 MB.</p>
+        <p class="vhelp">Grave a sua tradução ou escolha um vídeo da galeria. Recomendamos vídeos de 4 a 15 segundos. O máximo é 20 segundos e 35 MB.</p>
         <div class="actions">
           <button type="button" class="btn ghost" id="vCamBtn">Gravar com a câmera</button>
           <button type="button" class="btn ghost" id="vGalBtn">Escolher da galeria</button>
@@ -313,13 +294,12 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 <script>
 /* ===== CONFIGURAÇÃO ===== */
 const CONFIG = {
-  videoInvertido: "4SZskD_ZiKC",   // código do vídeo do YouTube escrito de trás para frente (só para não aparecer de cara)
-  marcaDagua: true,         // mostra o nome do participante, pequeno, no canto do vídeo (desencoraja gravação de tela)
-  endpoint: "https://script.google.com/macros/s/AKfycbw5adPRI4jf5S7Ex5oJKjyHpB84wEI-nFVYB7VJkbdsu5J1jVW0SOv7OiApO7cjjznfgg/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
+  videoId: "CKiZ_DksZS4",
+  endpoint: "https://script.google.com/macros/s/AKfycbzImHLKghO7g7ZRHcpstttw4r4RBLymZgUS8ZvxnZLg2Tu1iV4IxJ3H7ip3h5lW_ygYBw/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
   codigo: "OE3",            // código de acesso
   consentimento: "Concordo voluntariamente em participar desta pesquisa. Autorizo o uso das minhas respostas para fins de estudo, ciente de que meu nome e WhatsApp serão acessados apenas pela equipe. O uso da minha imagem na internet dependerá de minha autorização prévia.",
   traducoes: ["A", "B", "C", "D", "E", "F"],
-  videoMaxMB: 20,           // tamanho máximo do vídeo de sugestão
+  videoMaxMB: 35,           // tamanho máximo do vídeo de sugestão
   videoMaxSeg: 20,          // duração máxima do vídeo de sugestão (segundos)
   /* t = segundo do vídeo em que o bloco termina (o vídeo para ali).
      ausentes = traduções que não aparecem naquele bloco (ficam esmaecidas). */
@@ -336,8 +316,6 @@ const $ = (id) => document.getElementById(id);
 const Q = CONFIG.blocos, L = CONFIG.traducoes, N = Q.length;
 const KEY = "oe3-pesquisa-v2";
 const MAXB = CONFIG.videoMaxMB * 1024 * 1024;
-const VIDEO_ID = CONFIG.videoInvertido.split("").reverse().join("");
-let lastErr = "", isClosed = false, offset = 0, encerraEm = null, demoPrazo = false;
 let stage = "intro", idx = 0, answers = [], adapter = null, yt = null;
 let sid = "", profile = null, outbox = [], shownAt = 0, replays = 0, flushP = null;
 let vd = null, busy = false, videoOk = false, guardUntil = 0;
@@ -359,8 +337,7 @@ function setMsg(el, text, bad) { el.textContent = text; el.className = bad ? "er
 function scrollTop() { window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
 function setBusy(b) {
   busy = b;
-  ["confirm", "prev", "replay", "goto", "gotoR", "vCamBtn", "vGalBtn", "vRemove", "finish", "skip"].forEach(function (id) { $(id).disabled = b; });
-  updateSug();
+  ["confirm", "prev", "replay", "goto", "gotoR", "sugBtn", "vCamBtn", "vGalBtn", "vRemove", "finish", "skip"].forEach(function (id) { $(id).disabled = b; });
 }
 
 /* ===== Montagem da tela ===== */
@@ -425,7 +402,6 @@ function useYouTube() {
 function useDemo() {
   if (adapter) return;
   $("yt").hidden = true;
-  $("shield").hidden = true;
   $("demo").hidden = false;
   const total = Q[N - 1].t + 5;
   let t = 0, on = false;
@@ -456,9 +432,8 @@ function loadYouTube() {
   window.onYouTubeIframeAPIReady = function () {
     if (adapter) return;
     yt = new YT.Player("yt", {
-      videoId: VIDEO_ID,
-      host: "https://www.youtube-nocookie.com",
-      playerVars: { rel: 0, playsinline: 1, modestbranding: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, cc_load_policy: 0 },
+      videoId: CONFIG.videoId,
+      playerVars: { rel: 0, playsinline: 1, modestbranding: 1 },
       events: {
         onReady: useYouTube,
         onStateChange: function (e) {
@@ -526,7 +501,7 @@ function flush() {
   flushP = (async function () {
     try {
       while (outbox.length) { await post(outbox[0]); outbox.shift(); save(); }
-    } catch (e) { lastErr = e && e.message || "erro"; }
+    } catch (e) {}
     flushP = null;
   })();
   return flushP;
@@ -560,7 +535,7 @@ function openAsk(j, prefill) {
   if (a && a.video) vd = { sent: true };
   $("vpanel").hidden = true;
   $("sugBtn").setAttribute("aria-expanded", "false");
-  updateSug();
+  renderVideo();
   setMsg($("err"), "", true);
   setMsg($("verr"), "", true);
   setMsg($("sendMsg"), "", false);
@@ -590,7 +565,6 @@ function enterReview() {
 }
 
 function tick() {
-  if (adapter && stage === "watching") $("pp").textContent = adapter.playing() ? "Pausar" : "Continuar";
   if (!adapter || Date.now() < guardUntil || (stage !== "watching" && stage !== "asking")) return;
   const q = Q[idx];
   if (adapter.playing() && adapter.time() >= q.t) {
@@ -623,7 +597,6 @@ function validateIntro() {
 
 $("intro").addEventListener("submit", function (e) {
   e.preventDefault();
-  if (isClosed) return;
   const bad = validateIntro();
   if (bad) { $("introErr").textContent = bad.msg; bad.el.focus(); return; }
   if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e aperte Começar de novo."; return; }
@@ -636,7 +609,6 @@ $("intro").addEventListener("submit", function (e) {
   };
   sid = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   answers = []; outbox = []; videoOk = false;
-  setWm();
   save();
   updateGoto();
   begin(0);
@@ -651,7 +623,6 @@ function offerResume(saved) {
   $("resumeGo").onclick = function () {
     if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e tente de novo."; return; }
     sid = saved.sid; profile = saved.profile; answers = saved.answers; outbox = saved.outbox || []; videoOk = !!saved.videoOk;
-    setWm();
     $("introErr").textContent = "";
     flush();
     if (answers.length >= N) { adapter.seek(Q[N - 1].t); enterReview(); }
@@ -676,31 +647,15 @@ function infoText(v) {
   return t;
 }
 
-function anyChecked() { return !!document.querySelector('input[name="opt"]:checked'); }
-
-function updateSug() {
-  const ok = anyChecked();
-  $("sugBtn").disabled = busy || !ok;
-  if (!ok) { $("vpanel").hidden = true; $("sugBtn").setAttribute("aria-expanded", "false"); }
-  renderVideo();
-}
-
 function renderVideo() {
-  const ok = anyChecked();
-  let t = "";
-  if (!ok) t = "Marque uma tradução para liberar este botão";
-  else if (vd) t = vd.sent ? "Vídeo já enviado" : "Vídeo pronto para enviar";
   $("sugBtn").dataset.on = vd ? "true" : "false";
-  $("sugSub").textContent = t;
-  $("sugSub").hidden = !t;
+  $("sugSub").textContent = vd ? (vd.sent ? "Vídeo já enviado" : "Vídeo pronto para enviar") : "";
+  $("sugSub").hidden = !vd;
   $("vprev").hidden = !(vd && vd.url);
   $("vsent").hidden = !(vd && vd.sent);
   $("vRemove").hidden = !vd;
   $("vconsentWrap").hidden = videoOk;
-  if (vd && vd.url) {
-    if ($("vplayer").getAttribute("src") !== vd.url) $("vplayer").src = vd.url;
-    $("vinfo").textContent = infoText(vd);
-  }
+  if (vd && vd.url) { $("vplayer").src = vd.url; $("vinfo").textContent = infoText(vd); }
 }
 
 function readDuration(url) {
@@ -740,7 +695,6 @@ $("sugBtn").onclick = function () {
   $("vpanel").hidden = !open;
   this.setAttribute("aria-expanded", open ? "true" : "false");
 };
-$("options").addEventListener("change", updateSug);
 $("vCamBtn").onclick = function () { $("vCam").click(); };
 $("vGalBtn").onclick = function () { $("vGal").click(); };
 ["vCam", "vGal"].forEach(function (id) {
@@ -771,8 +725,8 @@ $("ask").addEventListener("submit", async function (e) {
   const checked = Array.from(document.querySelectorAll('input[name="opt"]:checked')).map(function (i) { return i.value; });
   setMsg($("err"), "", true);
   setMsg($("verr"), "", true);
-  if (!checked.length) {
-    setMsg($("err"), "Marque pelo menos uma tradução.", true);
+  if (!checked.length && !vd) {
+    setMsg($("err"), "Marque pelo menos uma tradução, ou envie uma sugestão em vídeo.", true);
     return;
   }
   const novo = !!(vd && vd.file);
@@ -804,11 +758,9 @@ $("ask").addEventListener("submit", async function (e) {
     } catch (err) {
       setBusy(false);
       setMsg($("sendMsg"), "", false);
-      setMsg($("verr"), err && err.message === "encerrada"
-        ? "A pesquisa foi encerrada e não recebe mais respostas."
-        : "Não foi possível enviar o vídeo. Confira a internet e toque em Confirmar de novo.", true);
+      setMsg($("verr"), "Não foi possível enviar o vídeo. Confira a internet e toque em Confirmar de novo.", true);
       $("vpanel").hidden = false;
-      $("skip").hidden = false;
+      $("skip").hidden = !checked.length;
       return;
     }
     setBusy(false);
@@ -835,9 +787,7 @@ $("finish").onclick = async function () {
     if (outbox.length) await flush();
     setBusy(false);
     if (outbox.length) {
-      setMsg($("revMsg"), lastErr === "encerrada"
-        ? "A pesquisa foi encerrada e não recebe mais respostas."
-        : "Algumas respostas não foram enviadas. Confira a internet e toque em Finalizar pesquisa de novo.", true);
+      setMsg($("revMsg"), "Algumas respostas não foram enviadas. Confira a internet e toque em Finalizar pesquisa de novo.", true);
       return;
     }
   }
@@ -847,64 +797,8 @@ $("finish").onclick = async function () {
   scrollTop();
 };
 
-/* ===== Pausar/continuar, marca d'água e proteção do vídeo ===== */
-$("pp").onclick = function () { if (!adapter) return; if (adapter.playing()) adapter.pause(); else adapter.play(); };
-
-function setWm() {
-  $("wm").textContent = profile ? profile.nome : "";
-  $("wm").hidden = !(CONFIG.marcaDagua && profile);
-}
-
-["shield", "wm", "frame"].forEach(function (id) {
-  $(id).addEventListener("contextmenu", function (e) { e.preventDefault(); });
-});
-
-/* ===== Prazo da pesquisa ===== */
-function fmtRest(ms) {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  return Math.floor(s / 86400) + " d " + Math.floor(s % 86400 / 3600) + " h " + Math.floor(s % 3600 / 60) + " min " + (s % 60) + " s";
-}
-
-function setClosed() {
-  isClosed = true;
-  if (stage !== "intro") return;
-  $("timer").hidden = true;
-  $("ifields").hidden = true;
-  $("closed").hidden = false;
-}
-
-function tickTimer() {
-  if (encerraEm === null || isClosed) return;
-  const rest = encerraEm - (Date.now() + offset);
-  if (rest <= 0) { setClosed(); return; }
-  if (stage === "intro") {
-    $("timer").hidden = false;
-    $("tlab").textContent = "Tempo restante para participar" + (demoPrazo ? " (exemplo da prévia)" : "");
-    $("tval").textContent = fmtRest(rest);
-  }
-}
-setInterval(tickTimer, 1000);
-
-async function loadStatus() {
-  try {
-    if (!CONFIG.endpoint) {
-      demoPrazo = true;
-      encerraEm = Date.now() + 7 * 86400000;
-    } else {
-      const r = await fetch(CONFIG.endpoint + "?acao=status&t=" + Date.now());
-      const j = await r.json();
-      if (!j || !j.ok) return;
-      offset = (j.agora || Date.now()) - Date.now();
-      if (j.fechada) { setClosed(); return; }
-      encerraEm = j.encerraEm || null;
-    }
-  } catch (e) { return; }
-  tickTimer();
-}
-
 /* ===== Início ===== */
 buildStatic();
-loadStatus();
 renderProgress();
 updateGoto();
 loadYouTube();
