@@ -1,19 +1,13 @@
 <!doctype html>
-<html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
-</head>
-<body>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Pesquisa de estratégias de tradução - Oração Eucarística III</title>
-<meta name="claude:viewport-fit-sides" content="cover">
+
 <meta name="robots" content="noindex, nofollow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Familjen+Grotesk:wght@600;700&display=swap">
 <style>
-/* Layout: coluna única. Vídeo no topo, barra fina de progresso (só números), formulário de entrada, painel de resposta com 6 cartões (Tradução A a F) e botão de sugestão em vídeo. */
+/* Layout: coluna única. Vídeo no topo, barra fina de progresso, linha de controles (Pausar, Ver de novo, Ver devagar), formulário de entrada e painel de resposta com 6 cartões (Tradução A a F). */
 :root {
   --bg: #EDF1F4;
   --surface: #FFFFFF;
@@ -70,6 +64,8 @@ header { display: grid; gap: 6px; }
 .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: #EAF0F4; border-radius: 4px; width: 0; }
 .bar b { position: absolute; top: -4px; width: 3px; height: 16px; background: #FB923C; }
 .shield { position: absolute; inset: 0; background: transparent; }
+.veils { position: absolute; inset: 0; pointer-events: none; }
+.veil { position: absolute; }
 .wm { position: absolute; right: 8px; bottom: 8px; max-width: 60%; font-size: .72rem; line-height: 1.2; color: #fff; opacity: .45; text-shadow: 0 0 3px #000, 0 0 3px #000; pointer-events: none; user-select: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .prog { display: flex; align-items: center; gap: 12px; }
@@ -78,6 +74,7 @@ header { display: grid; gap: 6px; }
 .segs i.done { background: var(--ok); }
 .segs i.cur { background: var(--ink); }
 .count { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .95rem; color: var(--muted); white-space: nowrap; }
+.ctrls { display: flex; flex-wrap: wrap; gap: 10px; }
 
 .box { background: var(--surface); border: 2px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 18px; }
 .ifields { display: grid; gap: 18px; }
@@ -93,6 +90,7 @@ input[type="text"], input[type="tel"] { font: inherit; padding: 12px 14px; borde
 
 .btn { font: inherit; font-weight: 700; padding: 14px 22px; border-radius: 8px; border: 2px solid var(--ink); background: var(--ink); color: var(--on-ink); cursor: pointer; min-height: 52px; }
 .btn.ghost { background: transparent; color: var(--fg); }
+.btn.sm { padding: 10px 16px; min-height: 46px; }
 .btn:hover:not(:disabled) { filter: brightness(1.12); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .actions { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -142,6 +140,7 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
 
+</head><body>
 <main>
   <header>
     <h1>Pesquisa de estratégias de tradução - Oração Eucarística III</h1>
@@ -151,7 +150,6 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
   <div class="frame" id="frame">
     <div id="yt"></div>
     <div class="shield" id="shield"></div>
-    <div class="wm" id="wm" aria-hidden="true" hidden></div>
     <div class="demo" id="demo" hidden>
       <strong>Prévia sem o vídeo do YouTube</strong>
       <div class="clock" id="clock">0:00</div>
@@ -159,11 +157,19 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
       <button class="btn" type="button" id="demoToggle">Reproduzir</button>
       <small>Nesta prévia o relógio faz o papel do vídeo. Na página hospedada fora do Claude, o vídeo do YouTube aparece aqui.</small>
     </div>
+    <div class="veils" id="veils" aria-hidden="true"></div>
+    <div class="wm" id="wm" aria-hidden="true" hidden></div>
   </div>
 
   <div class="prog">
     <div class="segs" id="segs" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuenow="0"></div>
     <span class="count" id="count">0 / 0</span>
+  </div>
+
+  <div class="ctrls" id="ctrls" hidden>
+    <button class="btn ghost sm" type="button" id="pp">Pausar</button>
+    <button class="btn ghost sm" type="button" id="again">Ver de novo 🔁</button>
+    <button class="btn ghost sm" type="button" id="slow">Ver devagar 🐢</button>
   </div>
 
   <form class="box" id="intro" novalidate>
@@ -213,13 +219,13 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 
   <section class="box" id="watching" hidden>
     <p class="status">Assista até o vídeo parar.</p>
-    <button class="btn ghost" type="button" id="pp" style="justify-self:start">Pausar</button>
   </section>
 
   <form class="box" id="ask" hidden novalidate>
     <fieldset>
       <legend id="askTitle"></legend>
-      <p class="qhelp">Selecione a(s) tradução(ões) que melhor expressam o sentido do trecho. Evite marcar todas as opções</p>
+      <p class="qhelp">Selecione a(s) tradução(ões) que melhor expressa(m) o sentido do trecho.</p>
+      <p class="qhelp">Evite marcar todas as opções.</p>
       <div class="grid" id="options"></div>
       <p class="absnote" id="absNote" hidden>Opções indisponíveis: São traduções idênticas ou bem semelhantes à tradução base gravada pelo CATLIBRAS.</p>
 
@@ -248,14 +254,13 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
       <button class="btn ghost" type="button" id="skip" hidden style="justify-self:start">Continuar sem o vídeo</button>
     </div>
     <div class="actions">
-      <button class="btn ghost" type="button" id="replay">Rever trecho</button>
       <button class="btn" type="submit" id="confirm">Confirmar e continuar</button>
     </div>
   </form>
 
   <section class="box" id="review" hidden>
-    <h2>Você respondeu todos os blocos</h2>
-    <p>Toque em Finalizar pesquisa para concluir.</p>
+    <h2>Você respondeu tudo!</h2>
+    <p>Toque em Finalizar.</p>
     <div class="status" id="revMsg" role="status"></div>
     <div class="actions"><button class="btn" type="button" id="finish">Finalizar pesquisa</button></div>
   </section>
@@ -280,15 +285,27 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 const CONFIG = {
   videoInvertido: "4SZskD_ZiKC",   // código do vídeo do YouTube escrito de trás para frente (só para não aparecer de cara)
   marcaDagua: true,         // mostra o nome do participante, pequeno, no canto do vídeo (desencoraja gravação de tela)
-  endpoint: "https://script.google.com/macros/s/AKfycbwLtLH8JN4ExcwPXBOO-QcLIu7lQ2luvXKRVhyw9oxiUVnSk0gv2zWg-UGK7WCXrUOtDQ/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
+  endpoint: "https://script.google.com/macros/s/AKfycbw5adPRI4jf5S7Ex5oJKjyHpB84wEI-nFVYB7VJkbdsu5J1jVW0SOv7OiApO7cjjznfgg/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
   versaoScript: 3,          // versão do script da planilha que esta página espera
   consentimento: "Concordo voluntariamente em participar desta pesquisa. Autorizo o uso das minhas respostas para fins de estudo, ciente de que meu nome e WhatsApp serão acessados apenas pela equipe. O uso da minha imagem na internet dependerá de minha autorização prévia.",
   traducoes: ["A", "B", "C", "D", "E", "F"],
   videoMaxMB: 35,           // tamanho máximo do vídeo de sugestão
   videoMaxSeg: 20,          // duração máxima do vídeo de sugestão (segundos)
-  /* t = segundo do vídeo em que o bloco termina (o vídeo para ali).
-     ausentes = traduções que não aparecem naquele bloco (ficam esmaecidas). */
-  blocos: [
+  /* ESMAECIMENTO sobre o intérprete cuja tradução está indisponível no trecho.
+     Cada zona é um retângulo em % do quadro do vídeo: x e y = canto superior esquerdo, w = largura, h = altura.
+     Os valores abaixo são só de EXEMPLO (grade 3 x 2). Gere os reais com a página "Marcador de posições". */
+  esmaecerOpacidade: 0.45,  // intensidade do esmaecimento (0 a 1)
+  zonas: {
+    A: { x: 0.0,  y: 0.0,  w: 33.3, h: 50.0 },
+    B: { x: 33.3, y: 0.0,  w: 33.3, h: 50.0 },
+    C: { x: 66.6, y: 0.0,  w: 33.4, h: 50.0 },
+    D: { x: 0.0,  y: 50.0, w: 33.3, h: 50.0 },
+    E: { x: 33.3, y: 50.0, w: 33.3, h: 50.0 },
+    F: { x: 66.6, y: 50.0, w: 33.4, h: 50.0 }
+  },
+  /* t = segundo do vídeo em que o trecho termina (o vídeo para ali).
+     ausentes = traduções que não aparecem naquele trecho (ficam esmaecidas). */
+  trechos: [
     { t: 5,  ausentes: [] },
     { t: 15, ausentes: ["C", "F"] },
     { t: 20, ausentes: [] }
@@ -296,14 +313,14 @@ const CONFIG = {
 };
 
 const $ = (id) => document.getElementById(id);
-const Q = CONFIG.blocos, L = CONFIG.traducoes, N = Q.length;
-const KEY = "oe3-pesquisa-v3";
+const Q = CONFIG.trechos, L = CONFIG.traducoes, N = Q.length;
+const KEY = "oe3-pesquisa-v4";
 const MAXB = CONFIG.videoMaxMB * 1024 * 1024;
 const CHUNK = 3 * 1024 * 1024;     // o vídeo sobe em pedaços de 3 MB (múltiplo de 256 KB, exigência do Drive)
 const VIDEO_ID = CONFIG.videoInvertido.split("").reverse().join("");
 let stage = "intro", idx = 0, answers = [], adapter = null, yt = null;
 let sid = "", profile = null, outbox = [], shownAt = 0, replays = 0, flushP = null;
-let vd = null, busy = false, guardUntil = 0;
+let vd = null, busy = false, guardUntil = 0, uploading = false;
 
 /* ===== Salvamento no navegador (para continuar de onde parou) ===== */
 function loadSaved() {
@@ -323,19 +340,25 @@ function setMsg(el, text, bad) { el.textContent = text; el.className = bad ? "er
 function scrollTop() { window.scrollTo({ top: 0, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); }
 function setBusy(b) {
   busy = b;
-  ["confirm", "replay", "vCamBtn", "vRemove", "finish", "skip", "sugBtn"].forEach(function (id) { $(id).disabled = b; });
+  ["confirm", "again", "slow", "pp", "vCamBtn", "vRemove", "finish", "skip", "sugBtn"].forEach(function (id) { $(id).disabled = b; });
 }
 
 /* ===== Montagem da tela ===== */
 function buildStatic() {
   $("consentText").textContent = CONFIG.consentimento;
-  $("vhelp").textContent = "Grave a sua tradução com a câmera. Recomendamos vídeos de 4 a 15 segundos. O máximo é " + CONFIG.videoMaxSeg + " segundos e " + CONFIG.videoMaxMB + " MB.";
+  $("vhelp").textContent = "O seu vídeo deve durar de 4 a 15 segundos. O tamanho máximo do arquivo é de " + CONFIG.videoMaxMB + " MB.";
   $("options").innerHTML = L.map(function (l, i) {
     return '<label class="opt i' + (i + 1) + '" id="lab' + l + '" for="o' + l + '">' +
       '<input type="checkbox" id="o' + l + '" name="opt" value="' + l + '">' +
       '<span class="num" aria-hidden="true">' + l + '</span>' +
       '<span class="name">Tradução ' + l + '<span class="sub" hidden>indisponível</span></span>' +
       '<span class="tick" aria-hidden="true">✓</span></label>';
+  }).join("");
+  $("veils").innerHTML = L.map(function (l) {
+    const z = CONFIG.zonas[l];
+    if (!z) return "";
+    return '<div class="veil" id="veil' + l + '" hidden style="left:' + z.x + '%;top:' + z.y + '%;width:' + z.w + '%;height:' + z.h +
+      '%;background:rgba(12,20,27,' + CONFIG.esmaecerOpacidade + ')"></div>';
   }).join("");
   $("segs").style.gap = (N > 80 ? 1 : 2) + "px";
   $("segs").innerHTML = Q.map(function () { return "<i></i>"; }).join("");
@@ -353,6 +376,16 @@ function renderProgress() {
   $("segs").setAttribute("aria-valuenow", answers.length);
 }
 
+/* Esmaecimento: acompanha o trecho atual (muda junto com o trecho, antes do primeiro quadro do trecho seguinte). */
+function renderVeils() {
+  const on = stage === "watching" || stage === "asking";
+  const aus = on ? (Q[idx].ausentes || []) : [];
+  L.forEach(function (l) {
+    const el = $("veil" + l);
+    if (el) el.hidden = aus.indexOf(l) < 0;
+  });
+}
+
 function show(which) {
   stage = which;
   $("intro").hidden = which !== "intro";
@@ -360,7 +393,10 @@ function show(which) {
   $("ask").hidden = which !== "asking";
   $("review").hidden = which !== "review";
   $("done").hidden = which !== "done";
+  $("ctrls").hidden = !(which === "watching" || which === "asking");
+  $("pp").hidden = which !== "watching";
   renderProgress();
+  renderVeils();
 }
 
 /* ===== Player: YouTube (real) ou relógio (prévia) ===== */
@@ -371,7 +407,8 @@ function useYouTube() {
     seek: function (s) { yt.seekTo(s, true); },
     play: function () { yt.playVideo(); },
     pause: function () { yt.pauseVideo(); },
-    playing: function () { return yt.getPlayerState && yt.getPlayerState() === 1; }
+    playing: function () { return yt.getPlayerState && yt.getPlayerState() === 1; },
+    rate: function (r) { try { yt.setPlaybackRate(r); } catch (e) {} }
   };
 }
 
@@ -381,7 +418,7 @@ function useDemo() {
   $("shield").hidden = true;
   $("demo").hidden = false;
   const total = Q[N - 1].t + 5;
-  let t = 0, on = false;
+  let t = 0, on = false, speed = 1;
   Q.forEach(function (q) {
     const m = document.createElement("b");
     m.style.left = (q.t / total * 100) + "%";
@@ -392,14 +429,15 @@ function useDemo() {
     $("barfill").style.width = Math.min(100, t / total * 100) + "%";
     $("demoToggle").textContent = on ? "Pausar" : "Reproduzir";
   }
-  setInterval(function () { if (on && t < total) { t += 0.1; paint(); } }, 100);
+  setInterval(function () { if (on && t < total) { t += 0.1 * speed; paint(); } }, 100);
   adapter = {
     kind: "demo",
     time: function () { return t; },
     seek: function (s) { t = s; paint(); },
     play: function () { on = true; paint(); },
     pause: function () { on = false; paint(); },
-    playing: function () { return on; }
+    playing: function () { return on; },
+    rate: function (r) { speed = r; }
   };
   $("demoToggle").onclick = function () { if (stage === "intro") { $("introErr").textContent = "Preencha os dados e aperte Começar."; return; } on ? adapter.pause() : adapter.play(); };
   paint();
@@ -492,13 +530,29 @@ function flush() {
   return flushP;
 }
 
+/* Avisa antes de fechar a página no meio do envio de um vídeo */
+window.addEventListener("beforeunload", function (e) {
+  if (uploading) { e.preventDefault(); e.returnValue = ""; }
+});
+
 /* ===== Fluxo do teste ===== */
 function begin(from) {
   idx = from;
+  show("watching");
+  adapter.rate(1);
   adapter.seek(from > 0 ? Q[from - 1].t : 0);
   guardUntil = Date.now() + 700;
   adapter.play();
-  show("watching");
+  scrollTop();
+}
+
+function replay(speed) {
+  if (busy || !adapter) return;
+  replays++;
+  adapter.rate(speed);
+  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
+  guardUntil = Date.now() + 700;
+  adapter.play();
   scrollTop();
 }
 
@@ -515,7 +569,7 @@ function openAsk(j) {
     lab.querySelector(".sub").hidden = !off;
   });
   $("absNote").hidden = !(q.ausentes || []).length;
-  $("askTitle").textContent = "Bloco " + (j + 1) + ": quais traduções ficaram boas?";
+  $("askTitle").textContent = "Trecho " + (j + 1);
   $("vpanel").hidden = true;
   $("sugBtn").setAttribute("aria-expanded", "false");
   renderVideo();
@@ -549,6 +603,10 @@ function tick() {
   }
 }
 setInterval(tick, 150);
+
+$("pp").onclick = function () { if (!adapter) return; if (adapter.playing()) adapter.pause(); else adapter.play(); };
+$("again").onclick = function () { replay(1); };
+$("slow").onclick = function () { replay(0.75); };
 
 /* ----- Formulário de entrada ----- */
 function digits(el) { el.addEventListener("input", function () { el.value = el.value.replace(/\D/g, ""); }); }
@@ -586,8 +644,8 @@ $("intro").addEventListener("submit", function (e) {
 /* ----- Continuar de onde parou ----- */
 function offerResume(saved) {
   $("resumeText").textContent = saved.answers.length >= N
-    ? "Você já respondeu todos os blocos, mas ainda não finalizou a pesquisa."
-    : "Você já começou a pesquisa (" + saved.answers.length + " de " + N + " blocos respondidos). Quer continuar de onde parou?";
+    ? "Você já respondeu todos os trechos, mas ainda não finalizou a pesquisa."
+    : "Você já começou a pesquisa (" + saved.answers.length + " de " + N + " trechos respondidos). Quer continuar de onde parou?";
   $("resume").hidden = false;
   $("resumeGo").onclick = function () {
     if (!adapter) { $("introErr").textContent = "Aguarde o vídeo carregar e tente de novo."; return; }
@@ -670,16 +728,7 @@ $("vCamBtn").onclick = function () { $("vCam").click(); };
 $("vCam").addEventListener("change", function () { const f = this.files && this.files[0]; this.value = ""; pickVideo(f); });
 $("vRemove").onclick = function () { dropVideo(); renderVideo(); setMsg($("verr"), "", true); };
 
-/* ----- Resposta de cada bloco ----- */
-$("replay").onclick = function () {
-  if (busy) return;
-  replays++;
-  adapter.seek(idx === 0 ? 0 : Q[idx - 1].t);
-  guardUntil = Date.now() + 700;
-  adapter.play();
-  scrollTop();
-};
-
+/* ----- Resposta de cada trecho ----- */
 $("skip").onclick = function () { dropVideo(); renderVideo(); $("confirm").click(); };
 
 $("ask").addEventListener("submit", async function (e) {
@@ -703,6 +752,7 @@ $("ask").addEventListener("submit", async function (e) {
   };
   if (vd) {
     setBusy(true);
+    uploading = true;
     try {
       if (CONFIG.endpoint) {
         setMsg($("sendMsg"), "Enviando…", false);
@@ -712,6 +762,7 @@ $("ask").addEventListener("submit", async function (e) {
         await sendVideo(vd.file, j, function (p) { setMsg($("sendMsg"), "Enviando vídeo… " + Math.round(p * 100) + "%", false); });
       }
     } catch (err) {
+      uploading = false;
       setBusy(false);
       setMsg($("sendMsg"), "", false);
       setMsg($("verr"), "Não foi possível enviar o vídeo. Confira a internet e toque em Confirmar de novo. (Detalhe: " + ((err && err.message) || "erro") + ")", true);
@@ -719,6 +770,7 @@ $("ask").addEventListener("submit", async function (e) {
       $("skip").hidden = !checked.length;
       return;
     }
+    uploading = false;
     setBusy(false);
     setMsg($("sendMsg"), "", false);
   } else {
@@ -751,9 +803,7 @@ $("finish").onclick = async function () {
   scrollTop();
 };
 
-/* ===== Pausar/continuar, marca d'água e proteção do vídeo ===== */
-$("pp").onclick = function () { if (!adapter) return; if (adapter.playing()) adapter.pause(); else adapter.play(); };
-
+/* ===== Marca d'água e proteção do vídeo ===== */
 function setWm() {
   $("wm").textContent = profile ? profile.nome : "";
   $("wm").hidden = !(CONFIG.marcaDagua && profile);
@@ -788,5 +838,4 @@ loadYouTube();
 })();
 </script>
 
-</body>
-</html>
+</body></html>
