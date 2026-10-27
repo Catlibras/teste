@@ -27,14 +27,12 @@
   :root:not([data-theme="light"]) {
     --bg: #0C141B; --surface: #16212B; --fg: #EAF0F4; --muted: #A3B4C0; --line: #2D3C48;
     --ink: #EAF0F4; --on-ink: #0C141B; --focus: #6AA8FF; --danger: #FF8A80; --ok: #6DD58C;
-    --i1: #FB923C; --i2: #6EA2FF; --i3: #4ADE80; --i4: #C08BFF; --i5: #F472B6; --i6: #22D3EE;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #0C141B; --surface: #16212B; --fg: #EAF0F4; --muted: #A3B4C0; --line: #2D3C48;
   --ink: #EAF0F4; --on-ink: #0C141B; --focus: #6AA8FF; --danger: #FF8A80; --ok: #6DD58C;
-  --i1: #FB923C; --i2: #6EA2FF; --i3: #4ADE80; --i4: #C08BFF; --i5: #F472B6; --i6: #22D3EE;
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
@@ -161,15 +159,15 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
     <div class="wm" id="wm" aria-hidden="true" hidden></div>
   </div>
 
-  <div class="prog">
+  <div class="prog" id="prog">
     <div class="segs" id="segs" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuenow="0"></div>
     <span class="count" id="count">0 / 0</span>
   </div>
 
   <div class="ctrls" id="ctrls" hidden>
     <button class="btn ghost sm" type="button" id="pp">Pausar</button>
-    <button class="btn ghost sm" type="button" id="again">Ver de novo 🔁</button>
-    <button class="btn ghost sm" type="button" id="slow">Ver devagar 🐢</button>
+    <button class="btn ghost sm" type="button" id="again">De novo ▶️</button>
+    <button class="btn ghost sm" type="button" id="slow">Devagar 🐢</button>
   </div>
 
   <form class="box" id="intro" novalidate>
@@ -230,7 +228,7 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
       <p class="absnote" id="absNote" hidden>Opções indisponíveis: São traduções idênticas ou bem semelhantes à tradução base gravada pelo CATLIBRAS.</p>
 
       <button type="button" class="opt sug" id="sugBtn" data-on="false" aria-expanded="false" aria-controls="vpanel">
-        <span class="name">Enviar sugestão 🎥<span class="sub" id="sugSub" hidden></span></span>
+        <span class="name">🎥 Enviar sugestão<span class="sub" id="sugSub" hidden></span></span>
         <span class="tick" aria-hidden="true">✓</span>
       </button>
 
@@ -394,6 +392,8 @@ function show(which) {
   $("review").hidden = which !== "review";
   $("done").hidden = which !== "done";
   $("ctrls").hidden = !(which === "watching" || which === "asking");
+  $("frame").hidden = which === "done";
+  $("prog").hidden = which === "done";
   $("pp").hidden = which !== "watching";
   renderProgress();
   renderVeils();
