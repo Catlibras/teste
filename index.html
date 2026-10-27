@@ -281,7 +281,7 @@ button.opt { font: inherit; color: var(--fg); text-align: left; width: 100%; }
 <script>
 /* ===== CONFIGURAÇÃO ===== */
 const CONFIG = {
-  videoInvertido: "4SZskD_ZiKC",   // código do vídeo do YouTube escrito de trás para frente (só para não aparecer de cara)
+  videoInvertido: "k7OFG-NZDuM",   // código do vídeo do YouTube escrito de trás para frente (só para não aparecer de cara)
   marcaDagua: true,         // mostra o nome do participante, pequeno, no canto do vídeo (desencoraja gravação de tela)
   endpoint: "https://script.google.com/macros/s/AKfycbwLtLH8JN4ExcwPXBOO-QcLIu7lQ2luvXKRVhyw9oxiUVnSk0gv2zWg-UGK7WCXrUOtDQ/exec",             // URL do Google Apps Script (vazio = nada é enviado; serve só para testar a tela)
   versaoScript: 3,          // versão do script da planilha que esta página espera
@@ -292,21 +292,28 @@ const CONFIG = {
   /* ESMAECIMENTO sobre o intérprete cuja tradução está indisponível no trecho.
      Cada zona é um retângulo em % do quadro do vídeo: x e y = canto superior esquerdo, w = largura, h = altura.
      Os valores abaixo são só de EXEMPLO (grade 3 x 2). Gere os reais com a página "Marcador de posições". */
-  esmaecerOpacidade: 0.45,  // intensidade do esmaecimento (0 a 1)
+  esmaecerOpacidade: 0.85,  // intensidade do esmaecimento (0 a 1)
   zonas: {
-    A: { x: 0.0,  y: 0.0,  w: 33.3, h: 50.0 },
-    B: { x: 33.3, y: 0.0,  w: 33.3, h: 50.0 },
-    C: { x: 66.6, y: 0.0,  w: 33.4, h: 50.0 },
-    D: { x: 0.0,  y: 50.0, w: 33.3, h: 50.0 },
-    E: { x: 33.3, y: 50.0, w: 33.3, h: 50.0 },
-    F: { x: 66.6, y: 50.0, w: 33.4, h: 50.0 }
+    A: { x: 3.8,  y: 3.8,  w: 20.3, h: 44.4 },
+    B: { x: 26.3, y: 3.5,  w: 20.5, h: 44.0 },
+    C: { x: 49.0, y: 3.3,  w: 20.5, h: 44.7 },
+    D: { x: 3.5,  y: 51.8, w: 20.6, h: 44.2 },
+    E: { x: 26.4, y: 51.8, w: 20.4, h: 44.0 },
+    F: { x: 49.1, y: 51.8, w: 20.4, h: 44.0 }
   },
   /* t = segundo do vídeo em que o trecho termina (o vídeo para ali).
      ausentes = traduções que não aparecem naquele trecho (ficam esmaecidas). */
   trechos: [
-    { t: 5,  ausentes: [] },
-    { t: 15, ausentes: ["C", "F"] },
-    { t: 20, ausentes: [] }
+    { t: 38, ausentes: [] },
+    { t: 41, ausentes: ["A"] },
+    { t: 45, ausentes: ["C", "F"] },
+    { t: 50, ausentes: [] },
+    { t: 54, ausentes: ["F"] },
+    { t: 58, ausentes: ["B"] },
+    { t: 77, ausentes: ["D"] },
+    { t: 86, ausentes: ["E"] },
+    { t: 95, ausentes: ["A", "C", "E", "F"] },
+    { t: 105, ausentes: [] }
   ]
 };
 
